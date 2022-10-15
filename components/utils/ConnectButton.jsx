@@ -84,7 +84,7 @@ export const Button = () => {
                       </div>
                     )}
                     <span className="flex items-center font-medium">
-                      {chain.name}
+                      <span className="hidden md:block">{chain.name}</span>
                       <RiArrowDropDownLine className="text-2xl" />
                     </span>
                   </button>
