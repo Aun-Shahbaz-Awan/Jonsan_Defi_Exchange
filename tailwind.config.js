@@ -9,7 +9,7 @@ module.exports = {
       colors: {
         primary: "#25293D",
         secondary: {
-          light: "#F0F3F4",
+          light: "#E8EAEA",
           dark: "#626572",
         },
         grad: {
@@ -18,16 +18,16 @@ module.exports = {
           three: "#DEFEF6",
         },
         c_purple: {
-          light: "#F0F3FD",
-          drak: "#FBEFFD",
+          light: "#F1F2FD",
+          dark: "#EDE6FB",
         },
         c_yellow: {
           light: "#FEF2DF",
-          dark: "#FEF3CA",
+          dark: "#FFE9BD",
         },
         c_blue: {
-          light: "#E1F6F8",
-          drak: "#D3F3F4",
+          light: "#E0F5F7",
+          dark: "#C4EDF1",
         },
       },
     },

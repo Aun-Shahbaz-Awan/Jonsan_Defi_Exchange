@@ -1,6 +1,7 @@
 import Head from "next/head";
 // import Image from "next/image";
 import Hero from "../components/home/Hero";
+import Packages from "../components/home/Packages";
 
 export default function Home() {
   return (
@@ -13,6 +14,7 @@ export default function Home() {
 
       <main>
         <Hero />
+        <Packages />
       </main>
 
       <footer className=""></footer>

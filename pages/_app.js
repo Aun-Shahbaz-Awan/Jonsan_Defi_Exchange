@@ -53,7 +53,7 @@ function MyApp({ Component, pageProps }) {
   });
 
   return (
-    <div className="w-full bg-[url('/images/s1_top_bg.png')] bg-cover bg-no-repeat">
+    <div className="w-full bg-[url('/images/s1_top_bg.png')] bg-contain bg-no-repeat">
       <WagmiConfig client={wagmiClient}>
         <RainbowKitProvider
           chains={chains}
