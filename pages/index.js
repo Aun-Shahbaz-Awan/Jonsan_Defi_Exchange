@@ -1,4 +1,5 @@
 import Head from "next/head";
+import FAQ from "../components/home/FAQ";
 // import Image from "next/image";
 import Hero from "../components/home/Hero";
 import Packages from "../components/home/Packages";
@@ -15,6 +16,7 @@ export default function Home() {
       <main>
         <Hero />
         <Packages />
+        <FAQ/>
       </main>
 
       <footer className=""></footer>
