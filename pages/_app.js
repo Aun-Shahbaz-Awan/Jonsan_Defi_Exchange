@@ -5,7 +5,7 @@ import "@rainbow-me/rainbowkit/styles.css";
 import {
   getDefaultWallets,
   RainbowKitProvider,
-  darkTheme,
+  lightTheme
 } from "@rainbow-me/rainbowkit";
 import { chain, configureChains, createClient, WagmiConfig } from "wagmi";
 import { alchemyProvider } from "wagmi/providers/alchemy";
@@ -58,7 +58,7 @@ function MyApp({ Component, pageProps }) {
       <WagmiConfig client={wagmiClient}>
         <RainbowKitProvider
           chains={chains}
-          theme={darkTheme({
+          theme={lightTheme({
             overlayBlur: "small",
           })}
         >

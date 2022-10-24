@@ -1,7 +1,7 @@
 import React from "react";
 import { BsArrowRight } from "react-icons/bs";
 
-export default function CategoryCard({ data }) {
+export default function CategoryCard({ data, index, handlePackagesButton }) {
   return (
     <div className={`${data?.bgColor} text-primary px-7 py-10 rounded-xl`}>
       {/* Heading */}
@@ -46,7 +46,11 @@ export default function CategoryCard({ data }) {
       </div>
 
       {/* Button */}
-      <button className="flex justify-center items-center bg-primary text-white rounded-full py-2.5 px-auto w-full mt-8">
+      <button
+        onClick={() => handlePackagesButton(data?.button, index)}
+        disabled={data?.button === "Coming Soon"}
+        className="flex justify-center items-center bg-primary text-white rounded-full py-2.5 px-auto w-full mt-8"
+      >
         {data?.button} <BsArrowRight className="ml-3" />
       </button>
     </div>

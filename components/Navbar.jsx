@@ -1,7 +1,7 @@
 import React from "react";
 import { Button } from "./../components/utils/ConnectButton";
 import { HiOutlineMenu } from "react-icons/hi";
-// import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { AiOutlineClose } from "react-icons/ai";
 
 function Navbar() {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -18,14 +18,13 @@ function Navbar() {
             </div>
           </div>
           <div className="w-1/3 hidden md:flex justify-end">
-            {/* <ConnectButton /> */}
             <Button />
           </div>
           <div
             onClick={() => setIsOpen(!isOpen)}
             className="block md:hidden mr-3"
           >
-            <HiOutlineMenu />
+            {isOpen ? <AiOutlineClose /> : <HiOutlineMenu />}
           </div>
         </div>
       </div>
