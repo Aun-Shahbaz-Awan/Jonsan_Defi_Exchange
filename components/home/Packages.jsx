@@ -8,7 +8,6 @@ let categories = [
   "Multiply on Exchange",
   "Earn on Exchange",
 ];
-
 let categoryOneDetails = [
   {
     id: "multiple1",

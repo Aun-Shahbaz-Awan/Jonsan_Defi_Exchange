@@ -71,42 +71,47 @@ export default function BorrowTokenPopup({
                         : "---"}
                     </span>
                     <div className="flex justify-between items-center text-base pt-10 pb-3">
-                      <span className="font-semibbold text-gray-400">
+                      <span className="font-semibbold text-gray-600">
                         Token
                       </span>
                       <span>GUSD</span>
                     </div>
                     <span>
-                      Paying Amount (wei){" "}
-                      <span className="text-red-500">*</span>
+                      Paying Amount <span className="text-red-500">*</span>
                     </span>
                     <div className="flex justify-between items-center border border-gray-400 rounded-lg mt-1">
                       <input
                         value={borrowInfo?.token}
                         type="number"
-                        onChange={(e) =>
+                        onChange={(e) => {
                           setBorrowInfo((borrowInfo) => ({
                             ...borrowInfo,
                             tokens: e.target.value,
-                          }))
-                        }
+                          }));
+                        }}
                         className="bg-transparent w-full text-lg py-2 px-4 outline-none"
                       />
                       <span className="pr-4">TESTBNB</span>
                     </div>
                     <span className="text-right text-xs text-red-400 ml-1">
-                      {borrowInfo?.tokens >= 1 || borrowInfo?.tokens === 0
-                        ? ""
-                        : "Price must be greater then 1"}
+                      {borrowInfo?.tokens > 0 || borrowInfo?.tokens === 0 ? (
+                        <span className="text-right text-xs text-gray-700">
+                          You Will Get Estimated{" "}
+                          {(borrowInfo?.tokens * categoryInfo?.tokenRate) /
+                            1.25} GUSD
+                        </span>
+                      ) : (
+                        "Price must be greater then 1"
+                      )}
                     </span>
 
                     <div className="flex justify-between items-center text-base pt-10 pb-3">
-                      <span className="font-semibbold text-gray-400">
+                      <span className="font-semibbold text-gray-600">
                         Collateral
                       </span>
                       <span>125%</span>
                     </div>
-                    <span className="py-3 text-sm text-gray-400 leading-3">
+                    <span className="py-3 text-sm text-gray-600 leading-3">
                       *Trade fee changes from buying price for every successfull
                       transition.
                     </span>
@@ -123,7 +128,7 @@ export default function BorrowTokenPopup({
                     <button
                       type="button"
                       placeholder="Enter Listing Price in Ethereum"
-                      className="inline-flex justify-center rounded-lg mr-4 bg-transparent px-8 py-2 text-md font-medium text-gray-400 border border-gray-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                      className="inline-flex justify-center rounded-lg mr-4 bg-transparent px-8 py-2 text-md font-medium text-gray-600 border border-gray-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
                       onClick={() => {
                         setBorrowInfo((borrowInfo) => ({
                           ...borrowInfo,

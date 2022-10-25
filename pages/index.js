@@ -18,6 +18,8 @@ import BorrowTokenPopup from "../components/utils/modals/BorrowTokenPopup";
 // TOAST
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+// Loader
+import ScaleLoader from "react-spinners/ScaleLoader";
 
 export default function Home() {
   const { data: signer } = useSigner();
@@ -50,22 +52,22 @@ export default function Home() {
   console.log("Ex Contract:", ExchangeContract);
 
   const getBTCRate = () => {
+    // console.log("Exe BTC Rate...");
     if (categoryInfo.name !== "") {
       if (categoryInfo.name === "Borrow" && categoryInfo.index === 1) {
-        console.log("Getting BTC Rate...");
         ExchangeContract?.getBtcRate()
           .then((responce) => {
-            console.log("BTC Rate Responce:", parseInt(responce?._hex));
+            // console.log("BTC Rate Responce:", parseInt(responce?._hex));
             setCategoryInfo((categoryInfo) => ({
               ...categoryInfo,
               tokenRate: parseInt(responce?._hex),
             }));
           })
           .catch((error) => {
-            console.log("getBTCRate() Error:", error);
+            // console.log("getBTCRate() Error:", error);
             toast.error("2: ", error?.error?.message);
           });
-        console.log("Getting BTC Rate...");
+        // console.log("Getting BTC Rate...");
       }
     }
   };
@@ -93,18 +95,19 @@ export default function Home() {
           toast.error(error?.error?.data?.message);
         }),
       {
-        pending: "Waiting for Transaction to Approve",
+        pending: "Borrow in Process",
         error: "Transction Rejected 😏💔",
       }
     );
   };
+
   const handleBorrowFromBTC = () => {
-    console.log(
-      "Borrowing some Token from BTC...",
-      (categoryInfo?.tokenRate * borrowInfo?.tokens) / 1.25
-    );
-    console.log("CategoryInfo:", categoryInfo, "BorrowInfo:", borrowInfo);
-    console.log("Acc", address);
+    // console.log(
+    //   "Borrowing some Token from BTC...",
+    //   (categoryInfo?.tokenRate * borrowInfo?.tokens) / 1.25
+    // );
+    // console.log("CategoryInfo:", categoryInfo, "BorrowInfo:", borrowInfo);
+    // console.log("Acc", address);
     TESTBNBContract?.allowance(
       address,
       "0x802304d9715F2E49878d151cf51b0A6e3B04f5c3"
@@ -119,23 +122,28 @@ export default function Home() {
               BigInt(borrowInfo?.tokens * 1e18)
             )
               .then((tx) => {
-                tx.wait().then((responce) => {
-                  borrowBTC();
-                });
+                toast.promise(
+                  tx.wait().then((responce) => {
+                    borrowBTC();
+                  }),
+                  {
+                    pending: "Tx Wait",
+                    error: "Something wrong with Allowance 😏💔",
+                  }
+                );
               })
               .catch((error) => {
-                console.log("error:", error);
                 toast.error(error?.error?.message);
               }),
             {
-              pending: "Borrow in Process",
+              pending: "Allowance in Process",
               error: "Something wrong with Borrow 😏💔",
             }
           );
         } else {
           borrowBTC();
         }
-        console.log(">>>", BigInt(parseInt(responce._hex)));
+        // console.log(">>>", BigInt(parseInt(responce._hex)));
       })
       .catch((err) => console.log(err));
   };
@@ -154,16 +162,17 @@ export default function Home() {
 
   const handlePackagesButton = (categoryName, categoryId) => {
     setCategoryInfo({ name: categoryName, index: categoryId });
+    getBTCRate();
     setBorrowInfo((borrowInfo) => ({
       ...borrowInfo,
       openStatus: true,
     }));
   };
 
-  useEffect(() => {
-    getBTCRate();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [categoryInfo?.index, categoryInfo?.name]);
+  // useEffect(() => {
+  //   getBTCRate();
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [categoryInfo?.index, categoryInfo?.name]);
 
   return (
     <div className="">
@@ -182,7 +191,13 @@ export default function Home() {
           handlePackagePopupButton={handlePackagePopupButton}
         />
         <Hero />
-        <Packages handlePackagesButton={handlePackagesButton} />
+        {TESTBNBContract ? (
+          <Packages handlePackagesButton={handlePackagesButton} />
+        ) : (
+          <div className="flex justify-center">
+            <ScaleLoader size={20} />
+          </div>
+        )}
         <FAQ />
       </main>
 
