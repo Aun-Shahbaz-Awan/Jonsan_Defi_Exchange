@@ -65,9 +65,9 @@ export default function BorrowTokenPopup({
                   <div className="mt-2">
                     <span className="py-0.5 px-2 bg-gray-300 text-sm font-medium rounded-lg">
                       {categoryInfo?.index === 0
-                        ? "ETH Price: " + categoryInfo?.tokenRate
+                        ? "ETH Price: " + categoryInfo?.ETHRate
                         : categoryInfo?.index === 1
-                        ? "BTC Price: " + categoryInfo?.tokenRate
+                        ? "BTC Price: " + categoryInfo?.BTCRate
                         : "---"}
                     </span>
                     <div className="flex justify-between items-center text-base pt-10 pb-3">
@@ -97,8 +97,14 @@ export default function BorrowTokenPopup({
                       {borrowInfo?.tokens > 0 || borrowInfo?.tokens === 0 ? (
                         <span className="text-right text-xs text-gray-700">
                           You Will Get Estimated{" "}
-                          {(borrowInfo?.tokens * categoryInfo?.tokenRate) /
-                            1.25} GUSD
+                          {categoryInfo?.index === 0
+                            ? (borrowInfo?.tokens * categoryInfo?.ETHRate) /
+                              1.25
+                            : categoryInfo?.index === 1
+                            ? (borrowInfo?.tokens * categoryInfo?.BTCRate) /
+                              1.25
+                            : "Loading..."}
+                          GUSD
                         </span>
                       ) : (
                         "Price must be greater then 1"

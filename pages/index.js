@@ -32,7 +32,8 @@ export default function Home() {
   const [categoryInfo, setCategoryInfo] = React.useState({
     name: "",
     index: 0,
-    tokenRate: 0,
+    ETHRate: 0,
+    BTCRate: 0,
   });
 
   let GUSDContract,
@@ -51,41 +52,51 @@ export default function Home() {
   }
   console.log("Ex Contract:", ExchangeContract);
 
-  const getBTCRate = () => {
-    // console.log("Exe BTC Rate...");
+  const getTokenRate = () => {
+    console.log("Get Rate Called");
     if (categoryInfo.name !== "") {
-      if (categoryInfo.name === "Borrow" && categoryInfo.index === 1) {
-        ExchangeContract?.getBtcRate()
+      if (categoryInfo.name === "Borrow" && categoryInfo.index === 0) {
+        console.log("Getting ETH Rate Called");
+        ExchangeContract?.getEthRate()
           .then((responce) => {
-            // console.log("BTC Rate Responce:", parseInt(responce?._hex));
             setCategoryInfo((categoryInfo) => ({
               ...categoryInfo,
-              tokenRate: parseInt(responce?._hex),
+              ETHRate: parseInt(responce?._hex),
             }));
           })
           .catch((error) => {
-            // console.log("getBTCRate() Error:", error);
-            toast.error("2: ", error?.error?.message);
+            toast.error("Borrow BTC Rate Error :", error?.error?.message);
           });
-        // console.log("Getting BTC Rate...");
+      } else if (categoryInfo.name === "Borrow" && categoryInfo.index === 1) {
+        console.log("Getting BTC Rate Called");
+        ExchangeContract?.getBtcRate()
+          .then((responce) => {
+            setCategoryInfo((categoryInfo) => ({
+              ...categoryInfo,
+              BTCRate: parseInt(responce?._hex),
+            }));
+          })
+          .catch((error) => {
+            toast.error("Borrow BTC Rate Error :", error?.error?.message);
+          });
       }
     }
   };
-
-  const borrowBTC = () => {
+  // Borrow from ETH ______________________________________________>>>
+  const borrowFromETH = () => {
     toast.promise(
-      ExchangeContract?.borrowTokensForBtc(
+      ExchangeContract?.borrowTokensForEth(
         BigInt(borrowInfo?.tokens * 1e18),
-        BigInt((categoryInfo?.tokenRate * borrowInfo?.tokens * 1e18) / 1.25)
+        BigInt((categoryInfo?.ETHRate * borrowInfo?.tokens * 1e18) / 1.25)
       )
         .then((tx) =>
           toast.promise(
             tx.wait().then((responce) => {
-              console.log("Final Responce:", responce);
+              console.log("Final Borrow Responce:", responce);
               toast.success("Borrow Successfully 🥳🎉🎊!");
             }),
             {
-              pending: "Waiting for Transaction to Approve",
+              pending: "Please wait borrow in process!",
               error: "Transction Rejected 😏💔",
             }
           )
@@ -95,19 +106,81 @@ export default function Home() {
           toast.error(error?.error?.data?.message);
         }),
       {
-        pending: "Borrow in Process",
+        pending: "Step 2 of 2: Waiting for Borrow Tx. to Accept!",
         error: "Transction Rejected 😏💔",
       }
     );
   };
-
+  const handleBorrowFromETH = () => {
+    TESTETHContract?.allowance(
+      address,
+      "0x802304d9715F2E49878d151cf51b0A6e3B04f5c3"
+    )
+      .then((responce) => {
+        if (
+          BigInt(parseInt(responce._hex)) < BigInt(borrowInfo?.tokens * 1e18)
+        ) {
+          toast.promise(
+            TESTETHContract?.approve(
+              Exchange_Address,
+              BigInt(borrowInfo?.tokens * 1e18)
+            )
+              .then((tx) => {
+                toast.promise(
+                  tx.wait().then((responce) => {
+                    borrowFromETH();
+                  }),
+                  {
+                    pending: "Please wait allowance in process!",
+                    error: "Something wrong with Allowance 😏💔",
+                  }
+                );
+              })
+              .catch((error) => {
+                toast.error(error?.error?.message);
+              }),
+            {
+              pending: "Step 1 of 2: Waiting for Allowance Tx. to Accept!",
+              error: "Something wrong with Borrow 😏💔",
+            }
+          );
+        } else {
+          borrowFromETH();
+        }
+      })
+      .catch((err) => console.log(err));
+  };
+  // Borrow from ETH <<<_____________________________________________
+  // Borrow from BTC ______________________________________________>>>
+  const borrowFromBTC = () => {
+    toast.promise(
+      ExchangeContract?.borrowTokensForBtc(
+        BigInt(borrowInfo?.tokens * 1e18),
+        BigInt((categoryInfo?.BTCRate * borrowInfo?.tokens * 1e18) / 1.25)
+      )
+        .then((tx) =>
+          toast.promise(
+            tx.wait().then((responce) => {
+              console.log("Final Responce:", responce);
+              toast.success("Borrow Successfully 🥳🎉🎊!");
+            }),
+            {
+              pending: "Please wait borrow in process!",
+              error: "Transction Rejected 😏💔",
+            }
+          )
+        )
+        .catch((error) => {
+          console.log("Borrow Error:", error);
+          toast.error(error?.error?.data?.message);
+        }),
+      {
+        pending: "Step 2 of 2: Waiting for Borrow Tx. to Accept!",
+        error: "Transction Rejected 😏💔",
+      }
+    );
+  };
   const handleBorrowFromBTC = () => {
-    // console.log(
-    //   "Borrowing some Token from BTC...",
-    //   (categoryInfo?.tokenRate * borrowInfo?.tokens) / 1.25
-    // );
-    // console.log("CategoryInfo:", categoryInfo, "BorrowInfo:", borrowInfo);
-    // console.log("Acc", address);
     TESTBNBContract?.allowance(
       address,
       "0x802304d9715F2E49878d151cf51b0A6e3B04f5c3"
@@ -124,10 +197,10 @@ export default function Home() {
               .then((tx) => {
                 toast.promise(
                   tx.wait().then((responce) => {
-                    borrowBTC();
+                    borrowFromBTC();
                   }),
                   {
-                    pending: "Tx Wait",
+                    pending: "Please wait allowance in process!",
                     error: "Something wrong with Allowance 😏💔",
                   }
                 );
@@ -136,22 +209,22 @@ export default function Home() {
                 toast.error(error?.error?.message);
               }),
             {
-              pending: "Allowance in Process",
+              pending: "Step 1 of 2: Waiting for Allowance Tx. to Accept!",
               error: "Something wrong with Borrow 😏💔",
             }
           );
         } else {
-          borrowBTC();
+          borrowFromBTC();
         }
-        // console.log(">>>", BigInt(parseInt(responce._hex)));
       })
       .catch((err) => console.log(err));
   };
-
+  // Borrow from BTC <<<_____________________________________________
   const handlePackagePopupButton = () => {
-    console.log("cName:", categoryInfo.name, "cId:", categoryInfo.index);
     // Borrow From BTC
-    if (categoryInfo?.name === "Borrow" && categoryInfo?.index === 1) {
+    if (categoryInfo?.name === "Borrow" && categoryInfo?.index === 0) {
+      handleBorrowFromETH();
+    } else if (categoryInfo?.name === "Borrow" && categoryInfo?.index === 1) {
       handleBorrowFromBTC();
     }
     setBorrowInfo((borrowInfo) => ({
@@ -162,17 +235,12 @@ export default function Home() {
 
   const handlePackagesButton = (categoryName, categoryId) => {
     setCategoryInfo({ name: categoryName, index: categoryId });
-    getBTCRate();
+    getTokenRate();
     setBorrowInfo((borrowInfo) => ({
       ...borrowInfo,
       openStatus: true,
     }));
   };
-
-  // useEffect(() => {
-  //   getBTCRate();
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [categoryInfo?.index, categoryInfo?.name]);
 
   return (
     <div className="">

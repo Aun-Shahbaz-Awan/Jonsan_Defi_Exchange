@@ -22,7 +22,7 @@ let categoryOneDetails = [
     CLA: "25.64M",
     VAF: "3.00%",
     Protocol: "Maker (ETH-B)",
-    button: "Coming Soon",
+    button: "Borrow",
 
     bgColor: "bg-c_purple-light",
     cardColor: "bg-c_purple-dark",
