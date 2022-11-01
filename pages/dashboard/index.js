@@ -28,6 +28,7 @@ function Index() {
   const [selectedTxId, setSelectedTxId] = useState(0);
   const [borrowInfo, setBorrowInfo] = useState([]);
   const [totalInterest, setTotalInterest] = useState(0);
+  const [reimburseAmount, setReimburseAmount] = useState(0);
 
   let GUSDContract,
     TESTBNBContract,
@@ -142,6 +143,73 @@ function Index() {
       .catch((err) => console.log("Find total Allowance Error:", err));
   };
 
+  const reimburse = () => {
+    toast.promise(
+      ExchangeContract?.reimburse(selectedTxId, BigInt(reimburseAmount * 1e18))
+        .then((tx) => {
+          setIsLoaded(false);
+          toast.promise(
+            tx.wait().then((responce) => {
+              console.log("Reimburse Responce:", responce);
+              getBorrowInfo();
+              setIsLoaded(true);
+              toast.success("Reimburse Successfully 🥳🎉🎊!");
+            }),
+            {
+              pending: "Reimburse in Process...",
+              error: "Transction Rejected 😏💔",
+            }
+          );
+        })
+        .catch((error) => {
+          console.log("Borrow Error:", error);
+          toast.error(error?.error?.data?.message);
+        }),
+      {
+        pending: "Step 2 of 2: Waiting for Reimburse Tx. to Accept!",
+        error: "Transction Rejected 😏💔",
+      }
+    );
+  };
+
+  const handleReimburse = () => {
+    GUSDContract?.allowance(
+      address,
+      "0x802304d9715F2E49878d151cf51b0A6e3B04f5c3"
+    )
+      .then((responce) => {
+        if (BigInt(parseInt(responce._hex)) < BigInt(reimburseAmount * 1e18)) {
+          toast.promise(
+            GUSDContract?.approve(
+              Exchange_Address,
+              BigInt(parseInt(borrowInfo[0], 10))
+            )
+              .then((tx) => {
+                toast.promise(
+                  tx.wait().then((responce) => {
+                    reimburse();
+                  }),
+                  {
+                    pending: "Please Wait: Allowance in process!",
+                    error: "Something wrong with Allowance 😏💔",
+                  }
+                );
+              })
+              .catch((error) => {
+                toast.error(error?.error?.message);
+              }),
+            {
+              pending: "Step 1 of 2: Waiting for Allowance Tx. to Accept!",
+              error: "Something wrong with Borrow 😏💔",
+            }
+          );
+        } else {
+          reimburse();
+        }
+      })
+      .catch((err) => console.log("Find total Allowance Error:", err));
+  };
+
   React.useEffect(() => {
     if (signer) getBtcTxIds();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -161,15 +229,12 @@ function Index() {
         <div className="grid grid-cols-1 md:grid-cols-2 mx-3 md:mx-0 gap-8">
           {/* Column 1 */}
           <div className="bg-gradient-to-r from-grad-one via-grad-two to-grad-three rounded-xl p-7 shadow-xl">
-            <h6 className="text-xl font-medium">Pay your BTC Interest</h6>
             <div className="flex justify-between items-center">
-              <p className="text-gray-600 text-sm my-auto py-2">
-                Please Select One of the Transaction Id to Pay Its Interest.
-              </p>
+              <h6 className="text-xl font-medium">Pay your BTC Interest</h6>
               <div className="w-20 ml-4">
                 {isLoaded ? (
                   <Listbox value={selectedTxId} onChange={setSelectedTxId}>
-                    <div className="relative mt-1">
+                    <div className="relative border border-primary rounded-lg">
                       <Listbox.Button className="relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm">
                         <span className="block truncate">{selectedTxId}</span>
                         <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
@@ -232,6 +297,9 @@ function Index() {
                 )}
               </div>
             </div>
+            <p className="text-gray-600 text-sm my-auto py-2">
+              Please Select One of the Transaction Id to Pay Its Interest.
+            </p>
             <p className="flex items-center leading-8 font-medium cursor-pointer hover:gap-1">
               Total Borrowed GUST
               <span className="mx-2">
@@ -298,8 +366,79 @@ function Index() {
             </div>
           </div>
           {/* Column 2 */}
-          <div className="bg-gradient-to-r from-grad-three via-grad-two to-grad-one rounded-xl px-6 py-6 shadow-xl">
-            <h6 className="text-xl font-medium">Coming Soon!</h6>
+          <div>
+            {/* Column 2.1 */}
+            <div className="bg-gradient-to-r from-grad-three via-grad-two to-grad-one rounded-xl px-6 py-6 mb-8 shadow-xl">
+              {/* Refinance */}
+              <h6 className="text-xl font-medium">Refinance</h6>
+              <p className="text-gray-600 text-sm my-auto pb-2">
+                You can refinance the collateral between 120% to 500%.
+              </p>
+              <div className="flex flex-col md:flex-row mb-4 w-full">
+                <div className="flex flex-col mr-4">
+                  <label className="text-xs text-gray-600 mb-1">Tx ID</label>
+                  <input
+                    value={selectedTxId}
+                    disabled={true}
+                    className="bg-white rounded-lg border border-gray-300 px-4 py-1 outline-none w-20"
+                  />
+                </div>
+                <div className="flex flex-col w-full">
+                  <label className="text-xs text-gray-600 mb-1">
+                    Collateral Percentage
+                  </label>
+                  <input
+                    placeholder="Coming soon..."
+                    // value={totalInterest / 1e18}
+                    disabled={true}
+                    className="bg-white rounded-lg border border-gray-300 px-4 py-1 outline-none w-auto"
+                  />
+                </div>
+                <button className="bg-gradient-to-r from-grad-one via-grad-two to-grad-three text-primary border border-primary hover:scale-95 rounded-lg outline-none shadow-xl py-1 px-2 mt-2 md:ml-4 md:mt-auto">
+                  Update
+                </button>
+              </div>
+            </div>
+            {/* Column 2.2 */}
+            <div className="bg-gradient-to-r from-grad-three via-grad-two to-grad-one rounded-xl px-6 py-6 shadow-xl">
+              {/* Reimburse */}
+              <h6 className="text-xl font-medium">Reimburse</h6>
+              <p className="text-gray-600 text-sm my-auto pb-2">
+                You can return stable coin if you don't want to pay interest.
+              </p>
+              <div className="flex flex-col md:flex-row mb-4 w-full">
+                <div className="flex flex-col mr-4">
+                  <label className="text-xs text-gray-600 mb-1">Tx ID</label>
+                  <input
+                    value={selectedTxId}
+                    disabled={true}
+                    className="bg-white rounded-lg border border-gray-300 px-4 py-1 outline-none w-20"
+                  />
+                </div>
+                <div className="flex flex-col w-full">
+                  <label className="text-xs text-gray-600 mb-1">
+                    Ammout{" "}
+                    {isLoaded
+                      ? "(" +
+                        parseInt(borrowInfo[0], 10) / 1e18 +
+                        " GUST Available)"
+                      : "(Loading...)"}
+                  </label>
+                  <input
+                    placeholder="Enter reimbburse Value"
+                    value={reimburseAmount}
+                    onChange={(e) => setReimburseAmount(e.target.value)}
+                    className="bg-white rounded-lg border border-gray-300 px-4 py-1 outline-none w-auto"
+                  />
+                </div>
+                <button
+                  onClick={() => handleReimburse()}
+                  className="bg-gradient-to-r from-grad-one via-grad-two to-grad-three text-primary border border-primary hover:scale-95 rounded-lg outline-none shadow-xl py-1 px-2 mt-2 md:ml-4 md:mt-auto"
+                >
+                  Return
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
