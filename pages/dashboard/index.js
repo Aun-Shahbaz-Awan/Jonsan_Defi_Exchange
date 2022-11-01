@@ -84,6 +84,7 @@ function Index() {
             tx.wait().then((responce) => {
               console.log("Final Responce:", responce);
               getBorrowInfo();
+              setIsLoaded(true);
               toast.success("Interest Paid Successfully 🥳🎉🎊!");
             }),
             {
