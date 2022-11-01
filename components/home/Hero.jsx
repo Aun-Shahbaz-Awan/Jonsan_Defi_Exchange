@@ -1,3 +1,4 @@
+import Link from "next/link";
 import React from "react";
 import { BsArrowRight } from "react-icons/bs";
 
@@ -17,9 +18,11 @@ function Hero() {
         Earn a yield, Multiply your exposure or Borrow against your crypto. ETH,
         BTC and 30 more cryptos available to put to work.
       </p>
-      <button className="bg-primary text-white rounded-full py-3 px-6 flex items-center">
-        See Products <BsArrowRight className="ml-3" />
-      </button>
+      <Link href="/dashboard">
+        <button className="bg-primary text-white rounded-full py-3 px-6 flex items-center hover:bg-gradient-to-r from-grad-one via-grad-two to-grad-three hover:text-primary">
+          Dashboard <BsArrowRight className="ml-3" />
+        </button>
+      </Link>
       <div className="mt-12 flex flex-wrap justify-center gap-8">
         <div className="flex justify-between items-center bg-white bg-opacity-20 backdrop-blur-sm border border-white border-opacity-30 shadow-[0_1px_5px_rgba(0,0,0,0.15)] rounded-full px-10 py-2">
           One

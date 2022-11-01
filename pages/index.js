@@ -1,6 +1,6 @@
-import React, { useEffect } from "react";
+import React from "react";
 //  WEB3
-import { BigNumber, ethers } from "ethers";
+import { ethers } from "ethers";
 import { useSigner, useAccount } from "wagmi";
 import {
   GUSD_Address,
@@ -59,6 +59,7 @@ export default function Home() {
         console.log("Getting ETH Rate Called");
         ExchangeContract?.getEthRate()
           .then((responce) => {
+            console.log("ETH Rate:", responce);
             setCategoryInfo((categoryInfo) => ({
               ...categoryInfo,
               ETHRate: parseInt(responce?._hex),
@@ -71,6 +72,8 @@ export default function Home() {
         console.log("Getting BTC Rate Called");
         ExchangeContract?.getBtcRate()
           .then((responce) => {
+            console.log("BTC Rate:", responce);
+
             setCategoryInfo((categoryInfo) => ({
               ...categoryInfo,
               BTCRate: parseInt(responce?._hex),
