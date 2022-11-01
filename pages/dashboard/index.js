@@ -368,7 +368,7 @@ function Index() {
               </span>
               {isLoaded ? parseInt(borrowInfo[4], 10) + "%" : "Loading..."}
             </p>
-            <div className="flex items-center justify-between leading-8 mt-4 font-medium cursor-pointer hover:gap-1">
+            <div className="flex flex-col md:flex-row items-center md:justify-between leading-8 mt-4 font-medium cursor-pointer hover:gap-1">
               <div>
                 {isLoaded ? (
                   <input
@@ -385,7 +385,7 @@ function Index() {
 
               <button
                 onClick={() => handlePayInterest()}
-                className="bg-gradient-to-r from-grad-three via-grad-two to-grad-one text-primary border border-primary hover:scale-95 rounded-lg px-4 py-1 outline-none shadow-xl"
+                className="bg-gradient-to-r from-grad-three via-grad-two to-grad-one text-primary border border-primary hover:scale-95 rounded-lg px-4 py-1 mt-4 w-auto md:mt-0 outline-none shadow-xl"
               >
                 Pay Interest
               </button>
@@ -436,7 +436,7 @@ function Index() {
               {/* Reimburse */}
               <h6 className="text-xl font-medium">Reimburse</h6>
               <p className="text-gray-600 text-sm my-auto pb-2">
-                You can return stable coin if you don't want to pay interest.
+                You can return stable coin if you do not want to pay interest.
               </p>
               <div className="flex flex-col md:flex-row mb-4 w-full">
                 <div className="flex flex-col mr-4">
