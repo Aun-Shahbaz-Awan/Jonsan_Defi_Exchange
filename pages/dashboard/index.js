@@ -28,6 +28,7 @@ function Index() {
   const [selectedTxId, setSelectedTxId] = useState(0);
   const [borrowInfo, setBorrowInfo] = useState([]);
   const [totalInterest, setTotalInterest] = useState(0);
+  const [refinancePercentage, setRefinancePercentage] = useState(0);
   const [reimburseAmount, setReimburseAmount] = useState(0);
 
   let GUSDContract,
@@ -44,7 +45,6 @@ function Index() {
       signer
     );
   }
-  console.log("Ex Contract:", ExchangeContract);
 
   const getBtcTxIds = () => {
     ExchangeContract.getBtcTxIds(address)
@@ -57,7 +57,7 @@ function Index() {
         console.log("Error:", error);
       });
   };
-
+  // Get Borrow Info =======================================>>>
   const getBorrowInfo = () => {
     ExchangeContract.getBorrowInfo(selectedTxId)
       .then((info) => {
@@ -75,7 +75,7 @@ function Index() {
         console.log("getBorrowInfo Error:", error);
       });
   };
-
+  // Pay Interest ==========================================>>>
   const payInterest = () => {
     toast.promise(
       ExchangeContract?.payInterest(selectedTxId)
@@ -104,7 +104,6 @@ function Index() {
       }
     );
   };
-
   const handlePayInterest = () => {
     GUSDContract?.allowance(
       address,
@@ -142,7 +141,36 @@ function Index() {
       })
       .catch((err) => console.log("Find total Allowance Error:", err));
   };
-
+  // Refinance =============================================>>>
+  const handleRefinance = () => {
+    toast.promise(
+      ExchangeContract?.refinance(selectedTxId, refinancePercentage)
+        .then((tx) => {
+          setIsLoaded(false);
+          toast.promise(
+            tx.wait().then((responce) => {
+              console.log("Refinance Responce:", responce);
+              getBorrowInfo();
+              setIsLoaded(true);
+              toast.success("Refinance Successfully 🥳🎉🎊!");
+            }),
+            {
+              pending: "Refinance in Process...",
+              error: "Transction Rejected 😏💔",
+            }
+          );
+        })
+        .catch((error) => {
+          console.log("Borrow Error:", error);
+          toast.error(error?.error?.data?.message);
+        }),
+      {
+        pending: "Waiting for Refinance Tx. to Accept!",
+        error: "Transction Rejected 😏💔",
+      }
+    );
+  };
+  // Reimburse =============================================>>>
   const reimburse = () => {
     toast.promise(
       ExchangeContract?.reimburse(selectedTxId, BigInt(reimburseAmount * 1e18))
@@ -171,7 +199,6 @@ function Index() {
       }
     );
   };
-
   const handleReimburse = () => {
     GUSDContract?.allowance(
       address,
@@ -209,7 +236,7 @@ function Index() {
       })
       .catch((err) => console.log("Find total Allowance Error:", err));
   };
-
+  // useEffect =============================================>>>
   React.useEffect(() => {
     if (signer) getBtcTxIds();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -219,7 +246,6 @@ function Index() {
     if (signer && selectedTxId) getBorrowInfo();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedTxId]);
-  console.log("Date:", new Date(parseInt(borrowInfo[3], 10) * 1000));
 
   return (
     <React.Fragment>
@@ -388,13 +414,19 @@ function Index() {
                     Collateral Percentage
                   </label>
                   <input
-                    placeholder="Coming soon..."
-                    // value={totalInterest / 1e18}
-                    disabled={true}
+                    placeholder="Set % between 120 to 500"
+                    value={refinancePercentage}
+                    // disabled={true}
+                    onChange={(e) => {
+                      setRefinancePercentage(e.target.value);
+                    }}
                     className="bg-white rounded-lg border border-gray-300 px-4 py-1 outline-none w-auto"
                   />
                 </div>
-                <button className="bg-gradient-to-r from-grad-one via-grad-two to-grad-three text-primary border border-primary hover:scale-95 rounded-lg outline-none shadow-xl py-1 px-2 mt-2 md:ml-4 md:mt-auto">
+                <button
+                  onClick={() => handleRefinance()}
+                  className="bg-gradient-to-r from-grad-one via-grad-two to-grad-three text-primary border border-primary hover:scale-95 rounded-lg outline-none shadow-xl py-1 px-2 mt-2 md:ml-4 md:mt-auto"
+                >
                   Update
                 </button>
               </div>
