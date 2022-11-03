@@ -27,9 +27,23 @@ function Index() {
   const [BTCTxIds, setBTCTxIds] = React.useState([]);
   const [selectedTxId, setSelectedTxId] = useState(0);
   const [borrowInfo, setBorrowInfo] = useState([]);
+  const [interestRateInfo, setInterestRateInfo] = useState([]);
   const [totalInterest, setTotalInterest] = useState(0);
   const [refinancePercentage, setRefinancePercentage] = useState(0);
   const [reimburseAmount, setReimburseAmount] = useState(0);
+  // OnlyOwner
+  const [ownerAddress, setOwnerAddress] = useState("");
+  const [isOwner, setIsOwner] = useState(false);
+  const [returnCollateralTxId, setReturnCollateralTxId] = useState(0);
+  const [coldWalletAddress, setColdWalletAddress] = useState("");
+  const [refinanceFee, setRefinanceFee] = useState(0);
+  const [interestRates, setInterestRates] = useState("");
+  const [btcFeedAddress, setBtcFeedAddress] = useState("");
+  const [ethFeedAddress, setEthFeedAddress] = useState("");
+  // Withdraw - OnlyOwner
+  const [withdrawBtcAmount, setWithdrawBtcAmount] = useState(0);
+  const [withdrawEthAmount, setWithdrawEthAmount] = useState(0);
+  const [withdrawTokensAmount, setWithdrawTokensAmount] = useState(0);
 
   let GUSDContract,
     TESTBNBContract,
@@ -59,10 +73,18 @@ function Index() {
   };
   // Get Borrow Info =======================================>>>
   const getBorrowInfo = () => {
+    ExchangeContract.owner()
+      .then((info) => {
+        setOwnerAddress(info);
+        address === info ? setIsOwner(true) : setIsOwner(false);
+        console.log("Is Owner:", isOwner);
+      })
+      .catch((error) => {
+        console.log("getBorrowInfo Error:", error);
+      });
     ExchangeContract.getBorrowInfo(selectedTxId)
       .then((info) => {
         setBorrowInfo(info);
-        // console.log("Borrow Info:", info);
       })
       .catch((error) => {
         console.log("getBorrowInfo Error:", error);
@@ -70,6 +92,13 @@ function Index() {
     ExchangeContract.getTotalInterest(selectedTxId)
       .then((info) => {
         setTotalInterest(parseInt(info._hex, 16));
+      })
+      .catch((error) => {
+        console.log("getBorrowInfo Error:", error);
+      });
+    ExchangeContract.getInterestRates()
+      .then((info) => {
+        setInterestRateInfo(info);
       })
       .catch((error) => {
         console.log("getBorrowInfo Error:", error);
@@ -236,6 +265,244 @@ function Index() {
       })
       .catch((err) => console.log("Find total Allowance Error:", err));
   };
+  // ReturnCollateral ======================================>>>
+  const handleReturnCollateral = () => {
+    toast.promise(
+      ExchangeContract?.returnCollateral(returnCollateralTxId)
+        .then((tx) => {
+          setIsLoaded(false);
+          toast.promise(
+            tx.wait().then((responce) => {
+              console.log("Final Responce:", responce);
+              getBorrowInfo();
+              setIsLoaded(true);
+              toast.success("Return Collateral Successfully 🥳🎉🎊!");
+            }),
+            {
+              pending: "Return Collateral in Process...",
+              error: "Transction Rejected 😏💔",
+            }
+          );
+        })
+        .catch((error) => {
+          console.log("Borrow Error:", error);
+          toast.error(error?.error?.data?.message);
+        }),
+      {
+        pending: "Waiting for Tx. to Accept!",
+        error: "Transction Rejected 😏💔",
+      }
+    );
+  };
+  // Set Cold Wallet =======================================>>>
+  const handleSetColdWallet = () => {
+    toast.promise(
+      ExchangeContract?.setColdWallet(coldWalletAddress)
+        .then((tx) => {
+          setIsLoaded(false);
+          toast.promise(
+            tx.wait().then((responce) => {
+              console.log("Final Responce:", responce);
+              getBorrowInfo();
+              setIsLoaded(true);
+              toast.success("Cold Wallet Set Successfully 🥳🎉🎊!");
+            }),
+            {
+              pending: "Setting Cold Wallet in Process...",
+              error: "Transction Rejected 😏💔",
+            }
+          );
+        })
+        .catch((error) => {
+          console.log("Borrow Error:", error);
+          toast.error(error?.error?.data?.message);
+        }),
+      {
+        pending: "Waiting for Tx. to Accept!",
+        error: "Transction Rejected 😏💔",
+      }
+    );
+  };
+  // Set Refinance Fee =====================================>>>
+  const handleSetRefinanceFee = () => {
+    toast.promise(
+      ExchangeContract?.setRefinanceFee(refinanceFee)
+        .then((tx) => {
+          setIsLoaded(false);
+          toast.promise(
+            tx.wait().then((responce) => {
+              console.log("Final Responce:", responce);
+              getBorrowInfo();
+              setIsLoaded(true);
+              toast.success("Refinance Fee Set Successfully 🥳🎉🎊!");
+            }),
+            {
+              pending: "Setting Refinance Fee in Process...",
+              error: "Transction Rejected 😏💔",
+            }
+          );
+        })
+        .catch((error) => {
+          console.log("Borrow Error:", error);
+          toast.error(error?.error?.data?.message);
+        }),
+      {
+        pending: "Waiting for Tx. to Accept!",
+        error: "Transction Rejected 😏💔",
+      }
+    );
+  };
+  // Set Interest Rates =====================================>>>
+  const handleSetInterestRates = () => {
+    const interestRatesArray = interestRates.split(",").map((element) => {
+      return Number(element);
+    });
+    console.log("Interest rates", interestRatesArray);
+    toast.promise(
+      ExchangeContract?.setInterestRates(interestRatesArray)
+        .then((tx) => {
+          setIsLoaded(false);
+          toast.promise(
+            tx.wait().then((responce) => {
+              console.log("Final Responce:", responce);
+              getBorrowInfo();
+              setIsLoaded(true);
+              toast.success("Refinance Fee Set Successfully 🥳🎉🎊!");
+            }),
+            {
+              pending: "Setting Refinance Fee in Process...",
+              error: "Transction Rejected 😏💔",
+            }
+          );
+        })
+        .catch((error) => {
+          console.log("Borrow Error:", error);
+          toast.error(error?.error?.data?.message);
+        }),
+      {
+        pending: "Waiting for Tx. to Accept!",
+        error: "Transction Rejected 😏💔",
+      }
+    );
+  };
+  // Set Price Feeds =====================================>>>
+  const handleSetPriceFeeds = () => {
+    toast.promise(
+      ExchangeContract?.setPriceFeeds(btcFeedAddress, ethFeedAddress)
+        .then((tx) => {
+          setIsLoaded(false);
+          toast.promise(
+            tx.wait().then((responce) => {
+              console.log("Final Responce:", responce);
+              getBorrowInfo();
+              setIsLoaded(true);
+              toast.success("Price Feeds Set Successfully 🥳🎉🎊!");
+            }),
+            {
+              pending: "Setting Price Feeds in Process...",
+              error: "Transction Rejected 😏💔",
+            }
+          );
+        })
+        .catch((error) => {
+          console.log("Error:", error);
+          toast.error(error?.error?.data?.message);
+        }),
+      {
+        pending: "Waiting for Tx. to Accept!",
+        error: "Transction Rejected 😏💔",
+      }
+    );
+  };
+  // Widthdraw ===============================================================>>>
+  // Widthdraw BTC =========================================>>>
+  const handleWithdrawBtc = () => {
+    toast.promise(
+      ExchangeContract?.withdrawBtc(BigInt(withdrawBtcAmount * 1e18))
+        .then((tx) => {
+          setIsLoaded(false);
+          toast.promise(
+            tx.wait().then((responce) => {
+              console.log("Final Responce:", responce);
+              getBorrowInfo();
+              setIsLoaded(true);
+              toast.success("Withdraw BTC Successfully 🥳🎉🎊!");
+            }),
+            {
+              pending: "Withdraw BTC in Process...",
+              error: "Transction Rejected 😏💔",
+            }
+          );
+        })
+        .catch((error) => {
+          console.log("Borrow Error:", error);
+          toast.error(error?.error?.data?.message);
+        }),
+      {
+        pending: "Waiting for Tx. to Accept!",
+        error: "Transction Rejected 😏💔",
+      }
+    );
+  };
+  // Widthdraw BTC =========================================>>>
+  const handleWithdrawEth = () => {
+    toast.promise(
+      ExchangeContract?.withdrawEth(BigInt(withdrawEthAmount * 1e18))
+        .then((tx) => {
+          setIsLoaded(false);
+          toast.promise(
+            tx.wait().then((responce) => {
+              console.log("Final Responce:", responce);
+              getBorrowInfo();
+              setIsLoaded(true);
+              toast.success("Withdraw ETH Successfully 🥳🎉🎊!");
+            }),
+            {
+              pending: "Withdraw ETH in Process...",
+              error: "Transction Rejected 😏💔",
+            }
+          );
+        })
+        .catch((error) => {
+          console.log("Borrow Error:", error);
+          toast.error(error?.error?.data?.message);
+        }),
+      {
+        pending: "Waiting for Tx. to Accept!",
+        error: "Transction Rejected 😏💔",
+      }
+    );
+  };
+  // Widthdraw Tokens(GUST) ================================>>>
+  const handleWithdrawTokens = () => {
+    toast.promise(
+      ExchangeContract?.withdrawTokens(BigInt(withdrawTokensAmount * 1e18))
+        .then((tx) => {
+          setIsLoaded(false);
+          toast.promise(
+            tx.wait().then((responce) => {
+              console.log("Final Responce:", responce);
+              getBorrowInfo();
+              setIsLoaded(true);
+              toast.success("Withdraw Tokens Successfully 🥳🎉🎊!");
+            }),
+            {
+              pending: "Withdraw Tokens in Process...",
+              error: "Transction Rejected 😏💔",
+            }
+          );
+        })
+        .catch((error) => {
+          console.log("Borrow Error:", error);
+          toast.error(error?.error?.data?.message);
+        }),
+      {
+        pending: "Waiting for Tx. to Accept!",
+        error: "Transction Rejected 😏💔",
+      }
+    );
+  };
+
   // useEffect =============================================>>>
   React.useEffect(() => {
     if (signer) getBtcTxIds();
@@ -473,6 +740,270 @@ function Index() {
             </div>
           </div>
         </div>
+        {/* Only Owner */}
+        {isOwner ? (
+          <div>
+            <h5 className="text-center text-3xl font-medium mt-12 mb-8">
+              ONLY OWNER
+            </h5>
+            {/* Row 2 */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 bg-gradient-to-r from-grad-one via-grad-two to-grad-three rounded-xl p-7 mx-3 md:mx-0  shadow-xl">
+              {/* returnCollateral */}
+              <div className="px-6 py-6 border border-gray-400 rounded-xl">
+                <h6 className="text-xl font-medium">Return Collateral</h6>
+                <p className="text-gray-600 text-sm my-auto pb-2">
+                  You can return assets back to user for any reason.
+                </p>
+                <div className="flex flex-col md:flex-row mb-4 w-full">
+                  <div className="flex flex-col w-full">
+                    <label className="text-xs text-gray-600 mb-1">Tx ID</label>
+                    <input
+                      placeholder="Please enter Tx Id to return collateral"
+                      value={returnCollateralTxId}
+                      // disabled={true}
+                      onChange={(e) => {
+                        setReturnCollateralTxId(e.target.value);
+                      }}
+                      className="bg-white rounded-lg border border-gray-300 px-4 py-1 outline-none w-auto"
+                    />
+                  </div>
+                  <button
+                    onClick={() => handleReturnCollateral()}
+                    className="bg-gradient-to-r from-grad-one via-grad-two to-grad-three text-primary border border-primary hover:scale-95 rounded-lg outline-none shadow-xl py-1 px-2 mt-2 md:ml-4 md:mt-auto"
+                  >
+                    Return
+                  </button>
+                </div>
+              </div>
+              {/* setColdWallet */}
+              <div className="px-6 py-6 border border-gray-400 rounded-xl">
+                <h6 className="text-xl font-medium">Set Cold Wallet</h6>
+                <p className="text-gray-600 text-sm my-auto pb-2">
+                  You can new cold wallet address here.
+                </p>
+                <div className="flex flex-col md:flex-row mb-4 w-full">
+                  <div className="flex flex-col w-full">
+                    <label className="text-xs text-gray-600 mb-1">
+                      Wallet Address
+                    </label>
+                    <input
+                      placeholder="0x012..."
+                      value={coldWalletAddress}
+                      onChange={(e) => {
+                        setColdWalletAddress(e.target.value);
+                      }}
+                      className="bg-white rounded-lg border border-gray-300 px-4 py-1 outline-none w-auto"
+                    />
+                  </div>
+                  <button
+                    onClick={() => handleSetColdWallet()}
+                    className="bg-gradient-to-r from-grad-one via-grad-two to-grad-three text-primary border border-primary hover:scale-95 rounded-lg outline-none shadow-xl py-1 px-2 mt-2 md:ml-4 md:mt-auto"
+                  >
+                    Set_Wallet
+                  </button>
+                </div>
+              </div>
+              {/* setInterestRates - incomplete */}
+              <div className="px-6 py-6 border border-gray-400 rounded-xl">
+                <h6 className="text-xl font-medium">Set Interest Rate</h6>
+                <p className="text-gray-600 text-sm my-auto pb-2">
+                  You can set new interest rates here (must be 6 comma
+                  separated).
+                </p>
+                <div className="flex flex-col md:flex-row mb-4 w-full">
+                  <div className="flex flex-col w-full">
+                    <label className="text-xs text-gray-600 mb-1">
+                      Rates 1,2,3,4,5,6 etc
+                    </label>
+                    <input
+                      placeholder="1,2,3,4,5"
+                      value={interestRates}
+                      onChange={(e) => {
+                        setInterestRates(e.target.value);
+                      }}
+                      className="bg-white rounded-lg border border-gray-300 px-4 py-1 outline-none w-auto"
+                    />
+                  </div>
+                  <button
+                    onClick={() => handleSetInterestRates()}
+                    className="bg-gradient-to-r from-grad-one via-grad-two to-grad-three text-primary border border-primary hover:scale-95 rounded-lg outline-none shadow-xl py-1 px-2 mt-2 md:ml-4 md:mt-auto"
+                  >
+                    Set_Rate
+                  </button>
+                </div>
+                <h6 className="text-xl font-medium mt-4 mb-1">
+                  Current Interest Rates
+                </h6>
+                <div className="flex items-center">
+                  <span className="mx-2">
+                    <BsArrowRight />
+                  </span>
+                  {interestRateInfo.map((rate, key) => {
+                    return (
+                      <span key={"rate" + key}>
+                        {parseInt(rate._hex, 16)},{" "}
+                      </span>
+                    );
+                  })}
+                </div>
+              </div>
+              {/* setPriceFeeds - incomplete */}
+              <div className="px-6 py-6 border border-gray-400 rounded-xl">
+                <h6 className="text-xl font-medium">Set Price Feeds</h6>
+                <p className="text-gray-600 text-sm my-auto pb-2">
+                  You can set new interest rates here (must be 6 comma
+                  separated).
+                </p>
+                <div className="flex flex-col md:flex-row mb-4 w-full">
+                  <div className="flex flex-col w-full">
+                    <label className="text-xs text-gray-600 mb-1">
+                      BTC Feed
+                    </label>
+                    <input
+                      placeholder="Enter BTC Feed Address"
+                      value={btcFeedAddress}
+                      onChange={(e) => {
+                        setBtcFeedAddress(e.target.value);
+                      }}
+                      className="bg-white rounded-lg border border-gray-300 px-4 py-1 outline-none w-auto mb-4"
+                    />
+                    <label className="text-xs text-gray-600 mb-1">
+                      ETH Feed
+                    </label>
+                    <input
+                      placeholder="Enter ETH Feed Address"
+                      value={ethFeedAddress}
+                      onChange={(e) => {
+                        setEthFeedAddress(e.target.value);
+                      }}
+                      className="bg-white rounded-lg border border-gray-300 px-4 py-1 outline-none w-auto"
+                    />
+                  </div>
+                  <button
+                    onClick={() => handleSetPriceFeeds()}
+                    className="bg-gradient-to-r from-grad-one via-grad-two to-grad-three text-primary border border-primary hover:scale-95 rounded-lg outline-none shadow-xl py-1 px-2 mt-2 md:ml-4 md:mt-auto"
+                  >
+                    Set_Price
+                  </button>
+                </div>
+              </div>
+              {/* setRefinanceFee */}
+              <div className="px-6 py-6 border border-gray-400 rounded-xl">
+                <h6 className="text-xl font-medium">Set Refinance Fee</h6>
+                <p className="text-gray-600 text-sm my-auto pb-2">
+                  You can set refinance fee here.
+                </p>
+                <div className="flex flex-col md:flex-row mb-4 w-full">
+                  <div className="flex flex-col w-full">
+                    <label className="text-xs text-gray-600 mb-1">
+                      New Fee
+                    </label>
+                    <input
+                      placeholder="0x012..."
+                      value={refinanceFee}
+                      onChange={(e) => {
+                        setRefinanceFee(e.target.value);
+                      }}
+                      className="bg-white rounded-lg border border-gray-300 px-4 py-1 outline-none w-auto"
+                    />
+                  </div>
+                  <button
+                    onClick={() => handleSetRefinanceFee()}
+                    className="bg-gradient-to-r from-grad-one via-grad-two to-grad-three text-primary border border-primary hover:scale-95 rounded-lg outline-none shadow-xl py-1 px-2 mt-2 md:ml-4 md:mt-auto"
+                  >
+                    Set_Fee
+                  </button>
+                </div>
+              </div>
+            </div>
+            <h5 className="text-center text-3xl font-medium mt-12 mb-8">
+              Withdraw Functions
+            </h5>
+            {/* Row 3 */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 bg-gradient-to-r from-grad-one via-grad-two to-grad-three rounded-xl p-7 mx-3 md:mx-0  shadow-xl">
+              {/* withdrawBtc */}
+              <div className="px-6 py-6 border border-gray-400 rounded-xl">
+                <h6 className="text-xl font-medium">Withdraw BTC</h6>
+                <p className="text-gray-600 text-sm my-auto pb-2">
+                  You can widthdraw BTC form here.
+                </p>
+                <div className="flex flex-col md:flex-row mb-4 w-full">
+                  <div className="flex flex-col w-full">
+                    <label className="text-xs text-gray-600 mb-1">Amount</label>
+                    <input
+                      placeholder="Enter BTC Amount"
+                      value={withdrawBtcAmount}
+                      onChange={(e) => {
+                        setWithdrawBtcAmount(e.target.value);
+                      }}
+                      className="bg-white rounded-lg border border-gray-300 px-4 py-1 outline-none w-auto"
+                    />
+                  </div>
+                  <button
+                    onClick={() => handleWithdrawBtc()}
+                    className="bg-gradient-to-r from-grad-one via-grad-two to-grad-three text-primary border border-primary hover:scale-95 rounded-lg outline-none shadow-xl py-1 px-2 mt-2 md:ml-4 md:mt-auto"
+                  >
+                    Widthdraw
+                  </button>
+                </div>
+              </div>
+              {/* withdrawEth */}
+              <div className="px-6 py-6 border border-gray-400 rounded-xl">
+                <h6 className="text-xl font-medium">Withdraw ETH</h6>
+                <p className="text-gray-600 text-sm my-auto pb-2">
+                  You can widthdraw ETH form here.
+                </p>
+                <div className="flex flex-col md:flex-row mb-4 w-full">
+                  <div className="flex flex-col w-full">
+                    <label className="text-xs text-gray-600 mb-1">Amount</label>
+                    <input
+                      placeholder="Enter ETH Amount"
+                      value={withdrawEthAmount}
+                      onChange={(e) => {
+                        setWithdrawEthAmount(e.target.value);
+                      }}
+                      className="bg-white rounded-lg border border-gray-300 px-4 py-1 outline-none w-auto"
+                    />
+                  </div>
+                  <button
+                    onClick={() => handleWithdrawEth()}
+                    className="bg-gradient-to-r from-grad-one via-grad-two to-grad-three text-primary border border-primary hover:scale-95 rounded-lg outline-none shadow-xl py-1 px-2 mt-2 md:ml-4 md:mt-auto"
+                  >
+                    Widthdraw
+                  </button>
+                </div>
+              </div>
+              {/* withdrawTokens */}
+              <div className="px-6 py-6 border border-gray-400 rounded-xl">
+                <h6 className="text-xl font-medium">Withdraw Tokens (GUST)</h6>
+                <p className="text-gray-600 text-sm my-auto pb-2">
+                  You can widthdraw Tokens(GUST) form here.
+                </p>
+                <div className="flex flex-col md:flex-row mb-4 w-full">
+                  <div className="flex flex-col w-full">
+                    <label className="text-xs text-gray-600 mb-1">Amount</label>
+                    <input
+                      placeholder="Enter GUST Amount"
+                      value={withdrawTokensAmount}
+                      onChange={(e) => {
+                        setWithdrawTokensAmount(e.target.value);
+                      }}
+                      className="bg-white rounded-lg border border-gray-300 px-4 py-1 outline-none w-auto"
+                    />
+                  </div>
+                  <button
+                    onClick={() => handleWithdrawTokens()}
+                    className="bg-gradient-to-r from-grad-one via-grad-two to-grad-three text-primary border border-primary hover:scale-95 rounded-lg outline-none shadow-xl py-1 px-2 mt-2 md:ml-4 md:mt-auto"
+                  >
+                    Widthdraw
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <></>
+        )}
       </div>
     </React.Fragment>
   );
