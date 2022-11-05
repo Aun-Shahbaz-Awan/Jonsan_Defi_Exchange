@@ -369,7 +369,7 @@ function Index() {
   // Set Interest Rates =====================================>>>
   const handleSetInterestRates = () => {
     const interestRatesArray = interestRates.split(",").map((element) => {
-      return Number(element);
+      return Number(element) * 100;
     });
     console.log("Interest rates", interestRatesArray);
     toast.promise(
@@ -674,7 +674,28 @@ function Index() {
               <span className="mx-2">
                 <BsArrowRight />
               </span>
-              {isLoaded ? parseInt(borrowInfo[4], 10) : "Loading..."}
+              {/* {isLoaded ? parseInt(borrowInfo[4], 10) : "Loading..."} */}
+              {isLoaded
+                ? parseInt(borrowInfo[2], 10) >= 200 &&
+                  parseInt(borrowInfo[2], 10) <= 500
+                  ? parseInt(interestRateInfo[0], 10) / 100 + "%"
+                  : parseInt(borrowInfo[2], 10) >= 190 &&
+                    parseInt(borrowInfo[2], 10) < 200
+                  ? parseInt(interestRateInfo[1], 10) / 100 + "%"
+                  : parseInt(borrowInfo[2], 10) >= 170 &&
+                    parseInt(borrowInfo[2], 10) <= 190
+                  ? parseInt(interestRateInfo[2], 10) / 100 + "%"
+                  : parseInt(borrowInfo[2], 10) >= 150 &&
+                    parseInt(borrowInfo[2], 10) < 170
+                  ? parseInt(interestRateInfo[3], 10) / 100 + "%"
+                  : parseInt(borrowInfo[2], 10) >= 130 &&
+                    parseInt(borrowInfo[2], 10) <= 150
+                  ? parseInt(interestRateInfo[4], 10) / 100 + "%"
+                  : parseInt(borrowInfo[2], 10) >= 120 &&
+                    parseInt(borrowInfo[2], 10) <= 130
+                  ? parseInt(interestRateInfo[5], 10) / 100 + "%"
+                  : "Invalid Collateral"
+                : "Loading..."}
             </p>
             {/* <p className="flex items-center leading-8 font-medium cursor-pointer hover:gap-1">
               Total Interest
@@ -789,7 +810,7 @@ function Index() {
           </div>
         </div>
         {/* Only Owner */}
-        {isOwner ? (
+        {!isOwner ? (
           <div>
             <h5 className="text-center text-3xl font-medium mt-12 mb-8">
               ONLY OWNER
@@ -861,10 +882,10 @@ function Index() {
                 <div className="flex flex-col md:flex-row mb-4 w-full">
                   <div className="flex flex-col w-full">
                     <label className="text-xs text-gray-600 mb-1">
-                      Rates 1,2,3,4,5,6 etc
+                      Rates 0.1, 1.5, 3, 4, 6, 8 etc
                     </label>
                     <input
-                      placeholder="1,2,3,4,5"
+                      placeholder="0.5,2,3,4,5,7"
                       value={interestRates}
                       onChange={(e) => {
                         setInterestRates(e.target.value);
@@ -883,13 +904,14 @@ function Index() {
                   Current Interest Rates
                 </h6>
                 <div className="flex items-center">
+                  Annual Interest
                   <span className="mx-2">
                     <BsArrowRight />
                   </span>
                   {interestRateInfo.map((rate, key) => {
                     return (
                       <span key={"rate" + key}>
-                        {parseInt(rate._hex, 16)},{" "}
+                        {parseInt(rate._hex, 16) / 100 + "%"},&nbsp;
                       </span>
                     );
                   })}
