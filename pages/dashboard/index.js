@@ -543,7 +543,9 @@ function Index() {
               <div className="w-24 ml-4">
                 {isLoaded ? (
                   <div className="flex items-center justify-end">
-                    <span className="mx-2">{isBTCSelected ? "BTC" : "ETH"}</span>
+                    <span className="mx-2">
+                      {isBTCSelected ? "BTC" : "ETH"}
+                    </span>
                     <Switch
                       checked={isBTCSelected}
                       onChange={setIsBTCSelected}
@@ -667,20 +669,20 @@ function Index() {
                   ).toLocaleTimeString()
                 : "Loading..."}
             </p>
-            {/* <p className="flex items-center leading-8 font-medium cursor-pointer hover:gap-1">
+            <p className="flex items-center leading-8 font-medium cursor-pointer hover:gap-1">
               Account Interest
               <span className="mx-2">
                 <BsArrowRight />
               </span>
-              {isLoaded ? parseInt(borrowInfo[4], 10) + "%" : "Loading..."}
-            </p> */}
-            <p className="flex items-center leading-8 font-medium cursor-pointer hover:gap-1">
+              {isLoaded ? parseInt(borrowInfo[4], 10) : "Loading..."}
+            </p>
+            {/* <p className="flex items-center leading-8 font-medium cursor-pointer hover:gap-1">
               Total Interest
               <span className="mx-2">
                 <BsArrowRight />
               </span>
               {isLoaded ? totalInterest / 1e18 + " GUST" : "Loading..."}
-            </p>
+            </p> */}
             <div className="flex flex-col md:flex-row items-center md:justify-between leading-8 mt-4 font-medium cursor-pointer hover:gap-1">
               <div>
                 {isLoaded ? (
