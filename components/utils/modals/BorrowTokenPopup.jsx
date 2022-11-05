@@ -9,6 +9,8 @@ export default function BorrowTokenPopup({
   setBorrowInfo,
   categoryInfo,
   handlePackagePopupButton,
+  collateral,
+  setCollateral,
 }) {
   return (
     <>
@@ -65,9 +67,15 @@ export default function BorrowTokenPopup({
                   <div className="mt-2">
                     <span className="py-0.5 px-2 bg-gray-300 text-sm font-medium rounded-lg">
                       {categoryInfo?.index === 0
-                        ? "ETH Price: " + categoryInfo?.ETHRate
+                        ? "ETH Price: " +
+                          (categoryInfo?.ETHRate
+                            ? categoryInfo?.ETHRate
+                            : "Loading...")
                         : categoryInfo?.index === 1
-                        ? "BTC Price: " + categoryInfo?.BTCRate
+                        ? "BTC Price: " +
+                          (categoryInfo?.BTCRate
+                            ? categoryInfo?.BTCRate
+                            : "Loading...")
                         : "---"}
                     </span>
                     <div className="flex justify-between items-center text-base pt-10 pb-3">
@@ -91,7 +99,10 @@ export default function BorrowTokenPopup({
                         }}
                         className="bg-transparent w-full text-lg py-2 px-4 outline-none"
                       />
-                      <span className="pr-4">TESTBNB</span>
+                      <span className="pr-4">
+                        {" "}
+                        {categoryInfo?.index === 0 ? "TESTETH" : "TESTBNB"}
+                      </span>
                     </div>
                     <span className="text-right text-xs text-red-400 ml-1">
                       {borrowInfo?.tokens > 0 || borrowInfo?.tokens === 0 ? (
@@ -99,10 +110,10 @@ export default function BorrowTokenPopup({
                           You Will Get Estimated{" "}
                           {categoryInfo?.index === 0
                             ? (borrowInfo?.tokens * categoryInfo?.ETHRate) /
-                              1.25
+                              (collateral / 100)
                             : categoryInfo?.index === 1
                             ? (borrowInfo?.tokens * categoryInfo?.BTCRate) /
-                              1.25
+                              (collateral / 100)
                             : "Loading..."}
                           GUSD
                         </span>
@@ -115,7 +126,26 @@ export default function BorrowTokenPopup({
                       <span className="font-semibbold text-gray-600">
                         Collateral
                       </span>
-                      <span>125%</span>
+                      <div className="flex items-center">
+                        <span className="flex justify-end">
+                          <input
+                            type="number"
+                            value={collateral}
+                            onChange={(e) => setCollateral(e.target.value)}
+                            onBlur={(e) => {
+                              if (e.target.value < 120) setCollateral(120);
+                              else if (e.target.value > 500) setCollateral(500);
+                              else setCollateral(e.target.value);
+                            }}
+                            className={`w-7/12 text-sm outline-none rounded-full px-3 py-1 ${
+                              collateral >= 120 && collateral <= 500
+                                ? "border border-green-400"
+                                : "border border-red-400"
+                            }`}
+                          />
+                        </span>
+                        <span className="ml-2">%</span>
+                      </div>
                     </div>
                     <span className="py-3 text-sm text-gray-600 leading-3">
                       *Trade fee changes from buying price for every successfull

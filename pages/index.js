@@ -25,12 +25,13 @@ export default function Home() {
   const { data: signer } = useSigner();
   const { address } = useAccount();
 
+  const [collateral, setCollateral] = React.useState(120);
   const [borrowInfo, setBorrowInfo] = React.useState({
     openStatus: false,
     tokens: 0,
   });
   const [categoryInfo, setCategoryInfo] = React.useState({
-    name: "",
+    name: "Borrow",
     index: 0,
     ETHRate: 0,
     BTCRate: 0,
@@ -50,16 +51,12 @@ export default function Home() {
       signer
     );
   }
-  console.log("Ex Contract:", ExchangeContract);
 
-  const getTokenRate = () => {
-    console.log("Get Rate Called");
-    if (categoryInfo.name !== "") {
-      if (categoryInfo.name === "Borrow" && categoryInfo.index === 0) {
-        console.log("Getting ETH Rate Called");
-        ExchangeContract?.getEthRate()
+  const getTokenRate = async (cat_name, cat_index) => {
+    if (cat_name !== "") {
+      if (cat_name === "Borrow" && cat_index === 0) {
+        await ExchangeContract?.getEthRate()
           .then((responce) => {
-            console.log("ETH Rate:", responce);
             setCategoryInfo((categoryInfo) => ({
               ...categoryInfo,
               ETHRate: parseInt(responce?._hex),
@@ -68,12 +65,9 @@ export default function Home() {
           .catch((error) => {
             toast.error("Borrow BTC Rate Error :", error?.error?.message);
           });
-      } else if (categoryInfo.name === "Borrow" && categoryInfo.index === 1) {
-        console.log("Getting BTC Rate Called");
-        ExchangeContract?.getBtcRate()
+      } else if (cat_name === "Borrow" && cat_index === 1) {
+        await ExchangeContract?.getBtcRate()
           .then((responce) => {
-            console.log("BTC Rate:", responce);
-
             setCategoryInfo((categoryInfo) => ({
               ...categoryInfo,
               BTCRate: parseInt(responce?._hex),
@@ -90,7 +84,10 @@ export default function Home() {
     toast.promise(
       ExchangeContract?.borrowTokensForEth(
         BigInt(borrowInfo?.tokens * 1e18),
-        BigInt((categoryInfo?.ETHRate * borrowInfo?.tokens * 1e18) / 1.25)
+        BigInt(
+          (categoryInfo?.ETHRate * borrowInfo?.tokens * 1e18) /
+            (collateral / 100)
+        )
       )
         .then((tx) =>
           toast.promise(
@@ -159,7 +156,10 @@ export default function Home() {
     toast.promise(
       ExchangeContract?.borrowTokensForBtc(
         BigInt(borrowInfo?.tokens * 1e18),
-        BigInt((categoryInfo?.BTCRate * borrowInfo?.tokens * 1e18) / 1.25)
+        BigInt(
+          (categoryInfo?.BTCRate * borrowInfo?.tokens * 1e18) /
+            (collateral / 100)
+        )
       )
         .then((tx) =>
           toast.promise(
@@ -237,13 +237,19 @@ export default function Home() {
   };
 
   const handlePackagesButton = (categoryName, categoryId) => {
+    console.log("Category Name:", categoryName, "ID:", categoryId);
     setCategoryInfo({ name: categoryName, index: categoryId });
-    getTokenRate();
     setBorrowInfo((borrowInfo) => ({
       ...borrowInfo,
       openStatus: true,
     }));
+    getTokenRate(categoryName, categoryId);
   };
+
+  // React.useEffect(() => {
+  //   if (ExchangeContract) getTokenRate();
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, []);
 
   return (
     <div className="">
@@ -260,6 +266,8 @@ export default function Home() {
           setBorrowInfo={setBorrowInfo}
           categoryInfo={categoryInfo}
           handlePackagePopupButton={handlePackagePopupButton}
+          collateral={collateral}
+          setCollateral={setCollateral}
         />
         <Hero />
         {TESTBNBContract ? (

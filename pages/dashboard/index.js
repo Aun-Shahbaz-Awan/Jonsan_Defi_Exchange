@@ -13,6 +13,7 @@ import { Token_Abi, Exchange_Abi } from "../../contracts/Abis";
 // Headless UI
 import { Listbox, Transition } from "@headlessui/react";
 import { BiCheck, BiChevronsDown } from "react-icons/bi";
+import { Switch } from "@headlessui/react";
 // Toast
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -34,6 +35,7 @@ function Index() {
   // OnlyOwner
   const [ownerAddress, setOwnerAddress] = useState("");
   const [isOwner, setIsOwner] = useState(false);
+  const [isBTCSelected, setIsBTCSelected] = useState(true);
   const [returnCollateralTxId, setReturnCollateralTxId] = useState(0);
   const [coldWalletAddress, setColdWalletAddress] = useState("");
   const [refinanceFee, setRefinanceFee] = useState(0);
@@ -60,16 +62,28 @@ function Index() {
     );
   }
 
-  const getBtcTxIds = () => {
-    ExchangeContract.getBtcTxIds(address)
-      .then((txIds) => {
-        setBTCTxIds(txIds);
-        setSelectedTxId(parseInt(txIds, 10));
-        setIsLoaded(true);
-      })
-      .catch((error) => {
-        console.log("Error:", error);
-      });
+  const getTxIds = () => {
+    if (isBTCSelected)
+      ExchangeContract.getBtcTxIds(address)
+        .then((txIds) => {
+          setBTCTxIds(txIds);
+          setSelectedTxId(parseInt(txIds, 10));
+          setIsLoaded(true);
+        })
+        .catch((error) => {
+          console.log("Error:", error);
+        });
+    else {
+      ExchangeContract.getEthTxIds(address)
+        .then((txIds) => {
+          setBTCTxIds(txIds);
+          setSelectedTxId(parseInt(txIds, 10));
+          setIsLoaded(true);
+        })
+        .catch((error) => {
+          console.log("Error:", error);
+        });
+    }
   };
   // Get Borrow Info =======================================>>>
   const getBorrowInfo = () => {
@@ -505,14 +519,14 @@ function Index() {
 
   // useEffect =============================================>>>
   React.useEffect(() => {
-    if (signer) getBtcTxIds();
+    if (signer) getTxIds();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [signer, address]);
+  }, [signer, address, isBTCSelected]);
 
   React.useEffect(() => {
     if (signer && selectedTxId) getBorrowInfo();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedTxId]);
+  }, [selectedTxId, isBTCSelected]);
 
   return (
     <React.Fragment>
@@ -522,67 +536,30 @@ function Index() {
         <div className="grid grid-cols-1 md:grid-cols-2 mx-3 md:mx-0 gap-8">
           {/* Column 1 */}
           <div className="bg-gradient-to-r from-grad-one via-grad-two to-grad-three rounded-xl p-7 shadow-xl">
-            <div className="flex justify-between items-center">
-              <h6 className="text-xl font-medium">Pay your BTC Interest</h6>
-              <div className="w-20 ml-4">
+            <div className="flex justify-between items-center mb-3">
+              <h6 className="text-xl font-medium">
+                Pay your {isBTCSelected ? "BTC" : "ETH"} Interest
+              </h6>
+              <div className="w-24 ml-4">
                 {isLoaded ? (
-                  <Listbox value={selectedTxId} onChange={setSelectedTxId}>
-                    <div className="relative border border-primary rounded-lg">
-                      <Listbox.Button className="relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm">
-                        <span className="block truncate">{selectedTxId}</span>
-                        <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-                          <BiChevronsDown
-                            className="h-5 w-5 text-gray-400"
-                            aria-hidden="true"
-                          />
-                        </span>
-                      </Listbox.Button>
-                      <Transition
-                        as={Fragment}
-                        leave="transition ease-in duration-100"
-                        leaveFrom="opacity-100"
-                        leaveTo="opacity-0"
-                      >
-                        <Listbox.Options className="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-                          {BTCTxIds.map((txId, idIndex) => (
-                            <Listbox.Option
-                              key={idIndex}
-                              className={({ active }) =>
-                                `relative cursor-default select-none py-2 pl-10 pr-4 ${
-                                  active
-                                    ? "bg-amber-100 text-amber-900"
-                                    : "text-gray-900"
-                                }`
-                              }
-                              value={parseInt(txId, 10)}
-                            >
-                              {({ selectedTxId }) => (
-                                <>
-                                  <span
-                                    className={`block truncate ${
-                                      selectedTxId
-                                        ? "font-medium"
-                                        : "font-normal"
-                                    }`}
-                                  >
-                                    {parseInt(txId, 10)}
-                                  </span>
-                                  {selectedTxId ? (
-                                    <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-amber-600">
-                                      <BiCheck
-                                        className="h-5 w-5"
-                                        aria-hidden="true"
-                                      />
-                                    </span>
-                                  ) : null}
-                                </>
-                              )}
-                            </Listbox.Option>
-                          ))}
-                        </Listbox.Options>
-                      </Transition>
-                    </div>
-                  </Listbox>
+                  <div className="flex items-center justify-end">
+                    <span className="mx-2">{isBTCSelected ? "BTC" : "ETH"}</span>
+                    <Switch
+                      checked={isBTCSelected}
+                      onChange={setIsBTCSelected}
+                      className={`${
+                        isBTCSelected ? "bg-teal-600" : "bg-pink-600"
+                      }  relative inline-flex h-[28px] w-[56px] shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2  focus-visible:ring-white focus-visible:ring-opacity-75`}
+                    >
+                      <span className="sr-only text-gray-400">Use setting</span>
+                      <span
+                        aria-hidden="true"
+                        className={`${
+                          isBTCSelected ? "translate-x-7" : "translate-x-0"
+                        } pointer-events-none inline-block h-[24px] w-[24px] transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out`}
+                      />
+                    </Switch>
+                  </div>
                 ) : (
                   <div className="flex justify-center">
                     <ScaleLoader size={20} />
@@ -590,9 +567,71 @@ function Index() {
                 )}
               </div>
             </div>
-            <p className="text-gray-600 text-sm my-auto py-2">
-              Please Select One of the Transaction Id to Pay Its Interest.
-            </p>
+            <div className="flex justify-between items-center mb-3 w-full">
+              <p className="text-gray-600 text-sm my-auto py-2 w-9/12">
+                Please Select One of the Transaction Id to Pay Its Interest.
+              </p>
+              <Listbox
+                value={selectedTxId}
+                onChange={setSelectedTxId}
+                // className="w-2/12"
+              >
+                <div className="relative border border-primary rounded-lg w-3/12">
+                  <Listbox.Button className="relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm">
+                    <span className="block truncate">{selectedTxId}</span>
+                    <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                      <BiChevronsDown
+                        className="h-5 w-5 text-gray-400"
+                        aria-hidden="true"
+                      />
+                    </span>
+                  </Listbox.Button>
+                  <Transition
+                    as={Fragment}
+                    leave="transition ease-in duration-100"
+                    leaveFrom="opacity-100"
+                    leaveTo="opacity-0"
+                  >
+                    <Listbox.Options className="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                      {BTCTxIds.map((txId, idIndex) => (
+                        <Listbox.Option
+                          key={idIndex}
+                          className={({ active }) =>
+                            `relative cursor-default select-none py-2 pl-10 pr-4 ${
+                              active
+                                ? "bg-amber-100 text-amber-900"
+                                : "text-gray-900"
+                            }`
+                          }
+                          value={parseInt(txId, 10)}
+                        >
+                          {({ selectedTxId }) => (
+                            <>
+                              <span
+                                className={`block truncate ${
+                                  selectedTxId ? "font-medium" : "font-normal"
+                                }`}
+                              >
+                                {parseInt(txId, 10)}
+                              </span>
+                              {selectedTxId ? (
+                                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-amber-600">
+                                  <BiCheck
+                                    className="h-5 w-5"
+                                    aria-hidden="true"
+                                  />
+                                </span>
+                              ) : null}
+                            </>
+                          )}
+                        </Listbox.Option>
+                      ))}
+                    </Listbox.Options>
+                  </Transition>
+                </div>
+              </Listbox>
+            </div>
+
             <p className="flex items-center leading-8 font-medium cursor-pointer hover:gap-1">
               Total Borrowed GUST
               <span className="mx-2">
@@ -628,12 +667,19 @@ function Index() {
                   ).toLocaleTimeString()
                 : "Loading..."}
             </p>
-            <p className="flex items-center leading-8 font-medium cursor-pointer hover:gap-1">
+            {/* <p className="flex items-center leading-8 font-medium cursor-pointer hover:gap-1">
               Account Interest
               <span className="mx-2">
                 <BsArrowRight />
               </span>
               {isLoaded ? parseInt(borrowInfo[4], 10) + "%" : "Loading..."}
+            </p> */}
+            <p className="flex items-center leading-8 font-medium cursor-pointer hover:gap-1">
+              Total Interest
+              <span className="mx-2">
+                <BsArrowRight />
+              </span>
+              {isLoaded ? totalInterest / 1e18 + " GUST" : "Loading..."}
             </p>
             <div className="flex flex-col md:flex-row items-center md:justify-between leading-8 mt-4 font-medium cursor-pointer hover:gap-1">
               <div>
