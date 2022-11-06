@@ -14,6 +14,7 @@ import { Token_Abi, Exchange_Abi } from "../../contracts/Abis";
 import { Listbox, Transition } from "@headlessui/react";
 import { BiCheck, BiChevronsDown } from "react-icons/bi";
 import { Switch } from "@headlessui/react";
+import { Tab } from "@headlessui/react";
 // Toast
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -528,6 +529,10 @@ function Index() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedTxId, isBTCSelected]);
 
+  function classNames(...classes) {
+    return classes.filter(Boolean).join(" ");
+  }
+
   return (
     <React.Fragment>
       <ToastContainer />
@@ -542,26 +547,58 @@ function Index() {
               </h6>
               <div className="w-24 ml-4">
                 {isLoaded ? (
-                  <div className="flex items-center justify-end">
-                    <span className="mx-2">
-                      {isBTCSelected ? "BTC" : "ETH"}
-                    </span>
-                    <Switch
-                      checked={isBTCSelected}
-                      onChange={setIsBTCSelected}
-                      className={`${
-                        isBTCSelected ? "bg-teal-600" : "bg-pink-600"
-                      }  relative inline-flex h-[28px] w-[56px] shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2  focus-visible:ring-white focus-visible:ring-opacity-75`}
-                    >
-                      <span className="sr-only text-gray-400">Use setting</span>
-                      <span
-                        aria-hidden="true"
-                        className={`${
-                          isBTCSelected ? "translate-x-7" : "translate-x-0"
-                        } pointer-events-none inline-block h-[24px] w-[24px] transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out`}
-                      />
-                    </Switch>
-                  </div>
+                  // <div className="flex items-center justify-end">
+                  //   <span className="mx-2">
+                  //     {isBTCSelected ? "BTC" : "ETH"}
+                  //   </span>
+                  //   <Switch
+                  //     checked={isBTCSelected}
+                  //     onChange={setIsBTCSelected}
+                  //     className={`${
+                  //       isBTCSelected ? "bg-teal-600" : "bg-pink-600"
+                  //     }  relative inline-flex h-[28px] w-[56px] shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2  focus-visible:ring-white focus-visible:ring-opacity-75`}
+                  //   >
+                  //     <span className="sr-only text-gray-400">Use setting</span>
+                  //     <span
+                  //       aria-hidden="true"
+                  //       className={`${
+                  //         isBTCSelected ? "translate-x-7" : "translate-x-0"
+                  //       } pointer-events-none inline-block h-[24px] w-[24px] transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out`}
+                  //     />
+                  //   </Switch>
+                  // </div>
+                  <Tab.Group>
+                    <Tab.List className="flex space-x-1 rounded-full p-1 bg-secondary-light">
+                      <Tab
+                        key="BTC"
+                        onClick={() => setIsBTCSelected(true)}
+                        className={({ selected }) =>
+                          classNames(
+                            "w-full rounded-full py-1 text-xs font-medium leading-5 text-primary",
+                            selected
+                              ? "bg-white shadow outline-none "
+                              : "text-gray-600 hover:bg-white/[0.3] hover:text-gray-800"
+                          )
+                        }
+                      >
+                        BTC
+                      </Tab>
+                      <Tab
+                        key="ETH"
+                        onClick={() => setIsBTCSelected(false)}
+                        className={({ selected }) =>
+                          classNames(
+                            "w-full rounded-full py-1 text-xs font-medium leading-5 text-primary",
+                            selected
+                              ? "bg-white shadow outline-none"
+                              : "text-gray-600 hover:bg-white/[0.3] hover:text-gray-800"
+                          )
+                        }
+                      >
+                        ETH
+                      </Tab>
+                    </Tab.List>
+                  </Tab.Group>
                 ) : (
                   <div className="flex justify-center">
                     <ScaleLoader size={20} />
