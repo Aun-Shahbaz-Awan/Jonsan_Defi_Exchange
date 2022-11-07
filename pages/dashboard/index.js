@@ -847,7 +847,7 @@ function Index() {
           </div>
         </div>
         {/* Only Owner */}
-        {!isOwner ? (
+        {isOwner ? (
           <div>
             <h5 className="text-center text-3xl font-medium mt-12 mb-8">
               ONLY OWNER
