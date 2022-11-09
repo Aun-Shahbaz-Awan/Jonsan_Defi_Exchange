@@ -15,7 +15,10 @@ function Navbar() {
           </h4>
           <div className="w-1/3 hidden md:flex justify-center">
             <div>
-              <span className="mr-6 cursor-pointer">Borrow</span>
+              <Link href="/#borrow">
+                <span className="mr-6 cursor-pointer">Borrow</span>
+              </Link>
+
               <span className="mr-6 cursor-pointer">Earn</span>
               <span className="cursor-pointer">Assets</span>
             </div>

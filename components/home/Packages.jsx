@@ -159,7 +159,7 @@ function classNames(...classes) {
 
 export default function Packages({ handlePackagesButton }) {
   return (
-    <div className="w-full px-3 py-16 sm:px-0">
+    <div id="borrow" className="w-full px-3 py-16 sm:px-0">
       <Tab.Group>
         <div className="max-w-lg mx-auto">
           <Tab.List className="flex space-x-1 rounded-full p-1 bg-secondary-light">
