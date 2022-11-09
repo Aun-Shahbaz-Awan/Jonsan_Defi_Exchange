@@ -13,7 +13,7 @@ let categoryOneDetails = [
     id: "multiple1",
     title: "Lowest ETH borrowing cost",
     description:
-      "The lowest Stability Fee and cheapest Vault for borrowing using ETH",
+      "The stability fee and cheapest vault for borrowing using ETH",
     icon: FaEthereum,
     unit: "ETH",
     with: "119.00",
@@ -29,11 +29,11 @@ let categoryOneDetails = [
   },
   {
     id: "multiple2",
-    title: "Lowest wBTC borrowing cost",
+    title: "Lowest BTC borrowing cost",
     description:
-      "The biggest possible Multiple to maximize your exposure to WBTC",
+      "The biggest possible Multiple to maximize your exposure to BTC",
     icon: FaBtc,
-    unit: "WBTC",
+    unit: "BTC",
     with: 116,
     upto: 502.28,
     MM: "4.33x",
@@ -45,42 +45,42 @@ let categoryOneDetails = [
     bgColor: "bg-c_yellow-light",
     cardColor: "bg-c_yellow-dark",
   },
-  {
-    id: "multiple3",
-    title: "Lowest stETH borrowing cost",
-    description:
-      "Great for Borrowing or Multiplying while earning staking rewards",
-    icon: FaPushed,
-    unit: "WSTETH",
-    with: 116,
-    upto: 502.28,
-    MM: "4.33x",
-    CLA: "25.64M",
-    VAF: "3.00%",
-    Protocol: "Maker (ETH-B)",
-    button: "Coming Soon",
-    bgColor: "bg-c_blue-light",
-    cardColor: "bg-c_blue-dark",
-  },
+  // {
+  //   id: "multiple3",
+  //   title: "Lowest stETH borrowing cost",
+  //   description:
+  //     "Great for Borrowing or Multiplying while earning staking rewards",
+  //   icon: FaPushed,
+  //   unit: "WSTETH",
+  //   with: 116,
+  //   upto: 502.28,
+  //   MM: "4.33x",
+  //   CLA: "25.64M",
+  //   VAF: "3.00%",
+  //   Protocol: "Maker (ETH-B)",
+  //   button: "Coming Soon",
+  //   bgColor: "bg-c_blue-light",
+  //   cardColor: "bg-c_blue-dark",
+  // },
 ];
 let categoryTwoDetails = [
-  {
-    id: "multiple1",
-    title: "Highest ETH multiple option",
-    description:
-      "The biggest possible Multiple to maximize your exposure to ETH",
-    icon: FaEthereum,
-    unit: "ETH",
-    with: 116,
-    upto: 502.28,
-    MM: "4.33x",
-    CLA: "25.64M",
-    VAF: "3.00%",
-    Protocol: "Maker (ETH-B)",
-    button: "Coming Soon",
-    bgColor: "bg-c_purple-light",
-    cardColor: "bg-c_purple-dark",
-  },
+  // {
+  //   id: "multiple1",
+  //   title: "Highest ETH multiple option",
+  //   description:
+  //     "The biggest possible Multiple to maximize your exposure to ETH",
+  //   icon: FaEthereum,
+  //   unit: "ETH",
+  //   with: 116,
+  //   upto: 502.28,
+  //   MM: "4.33x",
+  //   CLA: "25.64M",
+  //   VAF: "3.00%",
+  //   Protocol: "Maker (ETH-B)",
+  //   button: "Coming Soon",
+  //   bgColor: "bg-c_purple-light",
+  //   cardColor: "bg-c_purple-dark",
+  // },
   {
     id: "multiple2",
     title: "Highest wBTC multiple option",
@@ -95,28 +95,26 @@ let categoryTwoDetails = [
     VAF: "3.00%",
     Protocol: "Maker (ETH-B)",
     button: "Coming Soon",
-
     bgColor: "bg-c_yellow-light",
     cardColor: "bg-c_yellow-dark",
   },
-  {
-    id: "multiple3",
-    title: "StETH with medium cost and multiple",
-    description:
-      "Great for Borrowing or Multiplying while earning staking rewards",
-    icon: FaPushed,
-    unit: "WSTETH",
-    with: 116,
-    upto: 502.28,
-    MM: "4.33x",
-    CLA: "25.64M",
-    VAF: "3.00%",
-    Protocol: "Maker (ETH-B)",
-    button: "Coming Soon",
-
-    bgColor: "bg-c_blue-light",
-    cardColor: "bg-c_blue-dark",
-  },
+  // {
+  //   id: "multiple3",
+  //   title: "StETH with medium cost and multiple",
+  //   description:
+  //     "Great for Borrowing or Multiplying while earning staking rewards",
+  //   icon: FaPushed,
+  //   unit: "WSTETH",
+  //   with: 116,
+  //   upto: 502.28,
+  //   MM: "4.33x",
+  //   CLA: "25.64M",
+  //   VAF: "3.00%",
+  //   Protocol: "Maker (ETH-B)",
+  //   button: "Coming Soon",
+  //   bgColor: "bg-c_blue-light",
+  //   cardColor: "bg-c_blue-dark",
+  // },
 ];
 let categoryThreeDetails = [
   {
@@ -136,23 +134,23 @@ let categoryThreeDetails = [
     bgColor: "bg-c_purple-light",
     cardColor: "bg-c_purple-dark",
   },
-  {
-    id: "multiple2",
-    title: "Highest wBTC multiple option",
-    description:
-      "The biggest possible Multiple to maximize your exposure to WBTC",
-    icon: FaBtc,
-    unit: "WBTC",
-    with: 116,
-    upto: 502.28,
-    MM: "4.33x",
-    CLA: "25.64M",
-    VAF: "3.00%",
-    Protocol: "Maker (ETH-B)",
-    button: "Coming Soon",
-    bgColor: "bg-c_yellow-light",
-    cardColor: "bg-c_yellow-dark",
-  },
+  // {
+  //   id: "multiple2",
+  //   title: "Highest wBTC multiple option",
+  //   description:
+  //     "The biggest possible Multiple to maximize your exposure to WBTC",
+  //   icon: FaBtc,
+  //   unit: "WBTC",
+  //   with: 116,
+  //   upto: 502.28,
+  //   MM: "4.33x",
+  //   CLA: "25.64M",
+  //   VAF: "3.00%",
+  //   Protocol: "Maker (ETH-B)",
+  //   button: "Coming Soon",
+  //   bgColor: "bg-c_yellow-light",
+  //   cardColor: "bg-c_yellow-dark",
+  // },
 ];
 
 function classNames(...classes) {
@@ -190,7 +188,7 @@ export default function Packages({ handlePackagesButton }) {
               featured products here. See all Multiply collateral types →
             </div>
             <div
-              className={`grid grid-cols-1 md:grid-cols-3 max-w-6xl gap-8 mx-auto`}
+              className={`grid grid-cols-1 md:grid-cols-2 md:max-w-3xl gap-8 mx-auto`}
             >
               {categoryOneDetails.map((details, index) => (
                 <CategoryCard
@@ -208,7 +206,7 @@ export default function Packages({ handlePackagesButton }) {
               however you like. See all Borrow collateral types →
             </div>
             <div
-              className={`grid grid-cols-1 md:grid-cols-3 max-w-6xl gap-8 mx-auto`}
+              className={`grid grid-cols-1 md:grid-cols-1 md:max-w-sm gap-8 mx-auto`}
             >
               {categoryTwoDetails.map((details, index) => (
                 <CategoryCard
@@ -226,7 +224,7 @@ export default function Packages({ handlePackagesButton }) {
               yields. Select your Earn product below. Learn more about Earn →
             </div>
             <div
-              className={`grid grid-cols-1 md:grid-cols-2 md:max-w-3xl gap-8 mx-auto`}
+              className={`grid grid-cols-1 md:grid-cols-1 md:max-w-sm gap-8 mx-auto`}
             >
               {categoryThreeDetails.map((details, index) => (
                 <CategoryCard
