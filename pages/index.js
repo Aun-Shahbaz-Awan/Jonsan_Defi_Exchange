@@ -270,13 +270,14 @@ export default function Home() {
           setCollateral={setCollateral}
         />
         <Hero />
-        {TESTBNBContract ? (
+        <Packages handlePackagesButton={handlePackagesButton} />
+        {/* {TESTBNBContract ? (
           <Packages handlePackagesButton={handlePackagesButton} />
         ) : (
           <div className="flex justify-center">
             <ScaleLoader size={20} />
           </div>
-        )}
+        )} */}
         <FAQ />
       </main>
 
