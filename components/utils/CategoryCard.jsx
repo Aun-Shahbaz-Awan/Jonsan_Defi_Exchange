@@ -1,9 +1,11 @@
 import React from "react";
 import { BsArrowRight } from "react-icons/bs";
 import { useAccount } from "wagmi";
+import { useConnectModal } from "@rainbow-me/rainbowkit";
 
 export default function CategoryCard({ data, index, handlePackagesButton }) {
   const { isDisconnected } = useAccount();
+  const { openConnectModal } = useConnectModal();
   return (
     <div className={`${data?.bgColor} text-primary px-7 py-10 rounded-xl`}>
       {/* Heading */}
@@ -49,8 +51,11 @@ export default function CategoryCard({ data, index, handlePackagesButton }) {
 
       {/* Button */}
       {isDisconnected ? (
-        <button className="flex justify-center items-center bg-primary text-white rounded-full py-2.5 px-auto w-full mt-8">
-          Connect Wallet First
+        <button
+          onClick={openConnectModal}
+          className="flex justify-center items-center bg-primary text-white rounded-full py-2.5 px-auto w-full mt-8"
+        >
+          Connect Wallet
         </button>
       ) : (
         <button
