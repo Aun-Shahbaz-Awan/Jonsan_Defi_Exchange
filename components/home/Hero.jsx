@@ -23,7 +23,7 @@ function Hero() {
           Dashboard <BsArrowRight className="ml-3" />
         </button>
       </Link>
-      <div className="mt-12 flex flex-wrap justify-center gap-8">
+      {/* <div className="mt-12 flex flex-wrap justify-center gap-8">
         <div className="flex justify-between items-center bg-white bg-opacity-20 backdrop-blur-sm border border-white border-opacity-30 shadow-[0_1px_5px_rgba(0,0,0,0.15)] rounded-full px-10 py-2">
           One
         </div>
@@ -39,8 +39,8 @@ function Hero() {
         <div className="flex justify-between items-center bg-white bg-opacity-20 backdrop-blur-sm border border-white border-opacity-30 shadow-[0_1px_5px_rgba(0,0,0,0.15)] rounded-full px-10 py-2">
           Five
         </div>
-      </div>
-      <div className="w-full flex flex-col md:flex-row gap-6 items-center justify-between max-w-4xl mt-20">
+      </div> */}
+      <div className="w-full flex flex-col md:flex-row gap-6 items-center justify-between max-w-4xl mt-28">
         <div className="text-center">
           <p className="text-secondary-dark">30 Day Volume</p>
           <h4 className="text-4xl font-medium">$1.55B</h4>

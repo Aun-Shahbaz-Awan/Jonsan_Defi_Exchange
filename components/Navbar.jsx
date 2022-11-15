@@ -11,7 +11,10 @@ function Navbar() {
       <div className="p-3 md:p-5">
         <div className="flex justify-between items-center bg-white bg-opacity-40 backdrop-blur-sm border border-white border-opacity-50 shadow-[0_4px_30px_rgba(0,0,0,0.2)] rounded-xl p-3">
           <h4 className="font-bold pl-5 w-1/3">
-            <Link href="/">Exchange</Link>
+            <Link href="/">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/logo.png" alt="Logo" className="h-12"/>
+            </Link>
           </h4>
           <div className="w-1/3 hidden md:flex justify-center">
             <div>
