@@ -13,9 +13,9 @@ module.exports = {
           dark: "#626572",
         },
         grad: {
-          one: "#B5F0EE",
-          two: "#FFD3B6",
-          three: "#FF8B94",
+          one: "#F8D135",
+          two: "#F8D135",
+          three: "#F8D135",
         },
         c_purple: {
           light: "#B5F0EE",
