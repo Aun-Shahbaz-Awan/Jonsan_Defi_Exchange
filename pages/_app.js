@@ -5,7 +5,7 @@ import "@rainbow-me/rainbowkit/styles.css";
 import {
   getDefaultWallets,
   RainbowKitProvider,
-  lightTheme
+  lightTheme,
 } from "@rainbow-me/rainbowkit";
 import { chain, configureChains, createClient, WagmiConfig } from "wagmi";
 import { alchemyProvider } from "wagmi/providers/alchemy";
@@ -35,7 +35,7 @@ function MyApp({ Component, pageProps }) {
   };
 
   const { chains, provider } = configureChains(
-    [BinanceChain],
+    [BinanceChain, chain.goerli],
     [
       alchemyProvider({ alchemyId: "gFZetYQhmO8gDbZM_nss4JLAfCgZFUim" }),
       publicProvider(),
@@ -64,7 +64,7 @@ function MyApp({ Component, pageProps }) {
         >
           <Navbar />
           <Component {...pageProps} />
-          <Footer/>
+          <Footer />
         </RainbowKitProvider>{" "}
       </WagmiConfig>
     </div>
