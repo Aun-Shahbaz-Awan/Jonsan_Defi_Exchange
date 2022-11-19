@@ -1,9 +1,200 @@
+import React, { useState } from "react";
 import Link from "next/link";
-import React from "react";
+import axios from "axios";
+import { BsArrowRight } from "react-icons/bs";
+import NewsLetterPopup from "./utils/modals/NewsLetterPouop";
 
 function Footer() {
+  const [email, setEmail] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
+  const [modelOption, setModelOption] = useState({
+    title: "",
+    message: "",
+  });
+  function closeModal() {
+    setIsOpen(false);
+  }
+  // To get User Id hit this UrL https://api.telegram.org/bot{Your_Telegram_Bot_Id_Here}/getupdates
+  const handleSubscribe = () => {
+    // Message
+    let message = "New Subscriber: " + email;
+    // Reset From Data
+    setEmail("");
+    // API Options
+    var options = {
+      async: true,
+      crossDomain: true,
+      url:
+        "https://api.telegram.org/bot" +
+        process.env.Telegram_NL_Bot_Id +
+        "/sendMessage",
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "cache-control": "no-cache",
+      },
+      data: JSON.stringify({
+        chat_id: process.env.Chat_Id,
+        text: message,
+      }),
+    };
+    // API Call
+    axios(options)
+      .then((responce) => {
+        console.log("Msg Responce:", responce);
+        setModelOption({
+          title: "Successfully Subscribed!",
+          message:
+            "You have successfully subscribed to newsletter of Exchange, You will receive updates now.",
+        });
+        setIsOpen(true);
+      })
+      .catch((err) => {
+        console.log("Error:", err);
+        setModelOption({
+          title: "Bad Request!",
+          message: "Their is something wrong. Please retry later!",
+        });
+        setIsOpen(true);
+      });
+  };
   return (
+    // <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 px-40 mt-32 mb-16">
+    //   {/* Column #1 */}
+    //   <div className="w-8/12">
+    //     <Link href="/">
+    //       {/* eslint-disable-next-line @next/next/no-img-element */}
+    //       <img src="/logo.png" alt="Logo" className="h-12" />
+    //     </Link>
+    //     <div className="flex justify-start space-x-6 mt-2">
+    //       <a href="#" className="text-gray-400 hover:text-gray-500">
+    //         <span className="sr-only">Facebook</span>
+    //         <svg
+    //           className="w-6 h-6"
+    //           aria-hidden="true"
+    //           fill="currentColor"
+    //           viewBox="0 0 24 24"
+    //         >
+    //           <path
+    //             fillRule="evenodd"
+    //             d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"
+    //             clipRule="evenodd"
+    //           ></path>
+    //         </svg>
+    //       </a>
+
+    //       <a href="#" className="text-gray-400 hover:text-gray-500">
+    //         <span className="sr-only">Twitter</span>
+    //         <svg
+    //           className="w-6 h-6"
+    //           aria-hidden="true"
+    //           fill="currentColor"
+    //           viewBox="0 0 24 24"
+    //         >
+    //           <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84"></path>
+    //         </svg>
+    //       </a>
+    //       <a href="#" className="text-gray-400 hover:text-gray-500">
+    //         <span className="sr-only">GitHub</span>
+    //         <svg
+    //           className="w-6 h-6"
+    //           aria-hidden="true"
+    //           fill="currentColor"
+    //           viewBox="0 0 24 24"
+    //         >
+    //           <path
+    //             fillRule="evenodd"
+    //             d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
+    //             clipRule="evenodd"
+    //           ></path>
+    //         </svg>
+    //       </a>
+    //     </div>
+    //   </div>
+    //   {/* Column #2 */}
+    //   <div className="block md:flex">
+    //     <div className="w-full md:w-1/2">
+    //       <div className="px-5 py-2">
+    //         <Link
+    //           href="/about"
+    //           className="text-base leading-6 text-gray-500 hover:text-gray-900"
+    //         >
+    //           About
+    //         </Link>
+    //       </div>
+    //       <div className="px-5 py-2">
+    //         <Link
+    //           href="/privacy"
+    //           className="text-base leading-6 text-gray-500 hover:text-gray-900"
+    //         >
+    //           Privacy
+    //         </Link>
+    //       </div>
+    //       <div className="px-5 py-2">
+    //         <Link
+    //           href="/about"
+    //           className="text-base leading-6 text-gray-500 hover:text-gray-900"
+    //         >
+    //           Team
+    //         </Link>
+    //       </div>
+    //     </div>
+    //     <div className="w-full md:w-1/2">
+    //       <div className="px-5 py-2">
+    //         <a
+    //           href="#"
+    //           className="text-base leading-6 text-gray-500 hover:text-gray-900"
+    //         >
+    //           Pricing
+    //         </a>
+    //       </div>
+    //       <div className="px-5 py-2">
+    //         <Link
+    //           href="/contact"
+    //           className="text-base leading-6 text-gray-500 hover:text-gray-900"
+    //         >
+    //           Contact
+    //         </Link>
+    //       </div>
+    //       <div className="px-5 py-2">
+    //         <Link
+    //           href="/terms"
+    //           className="text-base leading-6 text-gray-500 hover:text-gray-900"
+    //         >
+    //           Terms
+    //         </Link>
+    //       </div>
+    //     </div>
+    //   </div>
+    //   {/* Column #3 */}
+    //   <div className="">
+    //     <h4 className="text-lg font-semibold mb-1">
+    //       Stay up to date with Exchange
+    //     </h4>
+    //     <p className="text-sm mb-3">
+    //       Subscribe to the newsletter for Exchange updates
+    //     </p>
+    //     <div className="flex justify-between items-center border-2 border-gray-600 w-full rounded-full  px-2 py-1">
+    //       <input
+    //         type="email"
+    //         className="w-full outline-none rounded-full px-3"
+    //       />
+    //       <p className="text-sm flex items-center">
+    //         Subscribe <BsArrowRight className="ml-3 mr-2" />
+    //       </p>
+    //     </div>
+    //     <p className="text-xs mt-1">
+    //       © 2022 Jonsan Exchange, Inc. All rights reserved.
+    //     </p>
+    //   </div>
+    // </section>
     <section>
+      <NewsLetterPopup
+        isOpen={isOpen}
+        closeModal={closeModal}
+        title={modelOption.title}
+        message={modelOption.message}
+      />
       <div className="max-w-screen-xl px-4 py-12 mx-auto space-y-8 overflow-hidden sm:px-6 lg:px-8">
         <nav className="flex flex-wrap justify-center -mx-5 -my-2">
           <div className="px-5 py-2">
@@ -129,9 +320,36 @@ function Footer() {
             </svg>
           </a>
         </div>
-        <p className="mt-8 text-base leading-6 text-center text-gray-400">
-          © 2022 Jonsan Exchange, Inc. All rights reserved.
-        </p>
+        {/* Email */}
+        <div className="flex flex-col items-center">
+          {/* <h4 className="text-lg font-semibold mb-1">
+            Stay up to date with Exchange
+          </h4> */}
+          <p className=" text-base font-medium mb-2">
+            Subscribe to the newsletter for Exchange updates
+          </p>
+          <div className="flex justify-between items-center border-2 border-gray-400 w-11/12 md:w-10/12 lg:w-4/12 rounded-full l px-1.5 py-1.5">
+            <input
+              type="email"
+              placeholder="Email Address"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full outline-none rounded-full px-3"
+            />
+            <p
+              onClick={() => handleSubscribe()}
+              className="text-sm flex items-center cursor-pointer"
+            >
+              <span className="hover:text-black hover:mr-0.5 transition-all ease-in-out">
+                Subscribe{" "}
+              </span>
+              <BsArrowRight className="ml-3 mr-2" />
+            </p>
+          </div>
+          <p className="mt-2 text-xs leading-3 text-center text-gray-400">
+            © 2022 Jonsan Exchange, Inc. All rights reserved.
+          </p>
+        </div>
       </div>
     </section>
   );
