@@ -5,7 +5,7 @@ import { ethers } from "ethers";
 import { useSigner, useAccount } from "wagmi";
 import {
   GUSD_Address,
-  TESTBNB_Address,
+  TESTBTC_Address,
   TESTETH_Address,
   Exchange_Address,
 } from "./../../contracts/Addresses";
@@ -54,7 +54,7 @@ function Index() {
     ExchangeContract = "";
   if (signer) {
     GUSDContract = new ethers.Contract(GUSD_Address, Token_Abi, signer);
-    TESTBNBContract = new ethers.Contract(TESTBNB_Address, Token_Abi, signer);
+    TESTBNBContract = new ethers.Contract(TESTBTC_Address, Token_Abi, signer);
     TESTETHContract = new ethers.Contract(TESTETH_Address, Token_Abi, signer);
     ExchangeContract = new ethers.Contract(
       Exchange_Address,

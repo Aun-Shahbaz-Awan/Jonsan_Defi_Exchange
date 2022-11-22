@@ -4,7 +4,7 @@ import { ethers } from "ethers";
 import { useSigner, useAccount } from "wagmi";
 import {
   GUSD_Address,
-  TESTBNB_Address,
+  TESTBTC_Address,
   TESTETH_Address,
   Exchange_Address,
 } from "./../contracts/Addresses";
@@ -25,7 +25,8 @@ export default function Home() {
   const { data: signer } = useSigner();
   const { address } = useAccount();
 
-  const [collateral, setCollateral] = React.useState(120);
+  const [collateral, setCollateral] = React.useState(0);
+  const [interestRates, setInterestRates] = React.useState([]);
   const [borrowInfo, setBorrowInfo] = React.useState({
     openStatus: false,
     tokens: 0,
@@ -43,7 +44,7 @@ export default function Home() {
     ExchangeContract = "";
   if (signer) {
     GUSDContract = new ethers.Contract(GUSD_Address, Token_Abi, signer);
-    TESTBNBContract = new ethers.Contract(TESTBNB_Address, Token_Abi, signer);
+    TESTBNBContract = new ethers.Contract(TESTBTC_Address, Token_Abi, signer);
     TESTETHContract = new ethers.Contract(TESTETH_Address, Token_Abi, signer);
     ExchangeContract = new ethers.Contract(
       Exchange_Address,
@@ -78,6 +79,21 @@ export default function Home() {
           });
       }
     }
+  };
+  const getInterestRates = async () => {
+    await ExchangeContract?.getInterestRates()
+      .then((responce) => {
+        // console.log("Interest Rates:", responce);
+        setInterestRates(responce);
+        setCollateral(parseInt(responce[0]?._hex, 16));
+        // setCategoryInfo((categoryInfo) => ({
+        //   ...categoryInfo,
+        //   ETHRate: parseInt(responce?._hex),
+        // }));
+      })
+      .catch((error) => {
+        toast.error("Borrow BTC Rate Error :", error?.error?.message);
+      });
   };
   // Borrow from ETH ______________________________________________>>>
   const borrowFromETH = () => {
@@ -244,10 +260,11 @@ export default function Home() {
       openStatus: true,
     }));
     getTokenRate(categoryName, categoryId);
+    getInterestRates();
   };
 
   // React.useEffect(() => {
-  //   if (ExchangeContract) getTokenRate();
+  //   if (ExchangeContract) getInterestRates();
   //   // eslint-disable-next-line react-hooks/exhaustive-deps
   // }, []);
 
@@ -266,6 +283,7 @@ export default function Home() {
           setBorrowInfo={setBorrowInfo}
           categoryInfo={categoryInfo}
           handlePackagePopupButton={handlePackagePopupButton}
+          interestRates={interestRates}
           collateral={collateral}
           setCollateral={setCollateral}
         />

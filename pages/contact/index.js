@@ -1,5 +1,9 @@
 import React, { useState } from "react";
 import axios from "axios";
+// React_Toastify
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+// React_Toastify
 import ContactFormPopup from "../../components/utils/modals/ContactFormPopup";
 
 function Index() {
@@ -19,6 +23,19 @@ function Index() {
   }
   // To get User Id hit this UrL https://api.telegram.org/bot{Your_Telegram_Bot_Id_Here}/getupdates
   const sendMessage = () => {
+    if (
+      messageInfo?.name === "" ||
+      messageInfo?.email === "" ||
+      messageInfo?.subject === "" ||
+      messageInfo?.message === ""
+    ) {
+      toast.error("Please fill all the fields!");
+      return;
+    }
+    if (!/\S+@\S+\.\S+/.test(messageInfo?.email)) {
+      toast.error("Please enter the a valid email address!");
+      return;
+    }
     // Message
     let message =
       "Name: " +
@@ -68,7 +85,7 @@ function Index() {
       .catch((err) => {
         console.log("Error:", err);
         setModelOption({
-          title: "Bad Request!",
+          title: err?.message ? err?.message : "Bad Request!",
           message: "Their is something wrong. Please retry later!",
         });
         setIsOpen(true);
@@ -77,6 +94,7 @@ function Index() {
 
   return (
     <div>
+      <ToastContainer />
       <ContactFormPopup
         isOpen={isOpen}
         closeModal={closeModal}
@@ -99,7 +117,7 @@ function Index() {
             value={messageInfo.name}
             className="w-full bg-gray-100 text-gray-900 mt-2 p-3 rounded-lg focus:outline-none focus:shadow-outline"
             type="text"
-            placeholder="Name"
+            placeholder="Name*"
           />
           <input
             onChange={(e) =>

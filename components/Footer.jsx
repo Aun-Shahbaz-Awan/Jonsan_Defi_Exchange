@@ -2,6 +2,10 @@ import React, { useState } from "react";
 import Link from "next/link";
 import axios from "axios";
 import { BsArrowRight } from "react-icons/bs";
+// ___React_Toastify_______________________________________
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+// ___React_Toastify_______________________________________
 import NewsLetterPopup from "./utils/modals/NewsLetterPouop";
 
 function Footer() {
@@ -16,6 +20,14 @@ function Footer() {
   }
   // To get User Id hit this UrL https://api.telegram.org/bot{Your_Telegram_Bot_Id_Here}/getupdates
   const handleSubscribe = () => {
+    if (email === "") {
+      toast.error("Please enter the email address first");
+      return;
+    }
+    if (!/\S+@\S+\.\S+/.test(email)) {
+      toast.error("Please Enter the Corrent Email Address!");
+      return;
+    }
     // Message
     let message = "New Subscriber: " + email;
     // Reset From Data
@@ -49,10 +61,10 @@ function Footer() {
         });
         setIsOpen(true);
       })
-      .catch((err) => {
-        console.log("Error:", err);
+      .catch((error) => {
+        console.log("Error:", error);
         setModelOption({
-          title: "Bad Request!",
+          title: error?.message,
           message: "Their is something wrong. Please retry later!",
         });
         setIsOpen(true);
@@ -189,6 +201,7 @@ function Footer() {
     //   </div>
     // </section>
     <section>
+      <ToastContainer />
       <NewsLetterPopup
         isOpen={isOpen}
         closeModal={closeModal}

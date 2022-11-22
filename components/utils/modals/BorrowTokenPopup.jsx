@@ -9,9 +9,11 @@ export default function BorrowTokenPopup({
   setBorrowInfo,
   categoryInfo,
   handlePackagePopupButton,
+  interestRates,
   collateral,
   setCollateral,
 }) {
+  // console.log("Interest Rate:", parseInt(interestRates[0]?._hex, 16));
   return (
     <>
       <Transition appear show={borrowInfo?.openStatus} as={Fragment}>
@@ -101,7 +103,7 @@ export default function BorrowTokenPopup({
                       />
                       <span className="pr-4">
                         {" "}
-                        {categoryInfo?.index === 0 ? "TESTETH" : "TESTBNB"}
+                        {categoryInfo?.index === 0 ? "TESTETH" : "TESTBTC"}
                       </span>
                     </div>
                     <span className="text-right text-xs text-red-400 ml-1">
@@ -133,12 +135,26 @@ export default function BorrowTokenPopup({
                             value={collateral}
                             onChange={(e) => setCollateral(e.target.value)}
                             onBlur={(e) => {
-                              if (e.target.value < 120) setCollateral(120);
-                              else if (e.target.value > 500) setCollateral(500);
+                              if (
+                                e.target.value <
+                                parseInt(interestRates[0]?._hex, 16)
+                              )
+                                setCollateral(
+                                  parseInt(interestRates[0]?._hex, 16)
+                                );
+                              else if (
+                                e.target.value >
+                                parseInt(interestRates[5]?._hex, 16)
+                              )
+                                setCollateral(
+                                  parseInt(interestRates[5]?._hex, 16)
+                                );
                               else setCollateral(e.target.value);
                             }}
                             className={`w-7/12 text-sm outline-none rounded-full px-3 py-1 ${
-                              collateral >= 120 && collateral <= 500
+                              collateral >=
+                                parseInt(interestRates[0]?._hex, 16) &&
+                              collateral <= parseInt(interestRates[5]?._hex, 16)
                                 ? "border border-green-400"
                                 : "border border-red-400"
                             }`}
