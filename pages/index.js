@@ -95,7 +95,7 @@ export default function Home() {
       ExchangeContract?.borrowTokensForEth(
         BigInt(
           (categoryInfo?.ETHRate * borrowInfo?.tokens * 1e18) /
-            (collateral / 100)
+            ((collateral + 1) / 100)
         ),
         {
           value: ethers.utils.parseEther(borrowInfo?.tokens.toString()),
@@ -171,7 +171,7 @@ export default function Home() {
         BigInt(borrowInfo?.tokens * 1e18),
         BigInt(
           (categoryInfo?.BTCRate * borrowInfo?.tokens * 1e18) /
-            (collateral / 100)
+            ((collateral + 1) / 100)
         )
       )
         .then((tx) =>
