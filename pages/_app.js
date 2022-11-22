@@ -13,29 +13,29 @@ import { publicProvider } from "wagmi/providers/public";
 import Footer from "../components/Footer";
 
 function MyApp({ Component, pageProps }) {
-  const BinanceChain = {
-    id: 97,
-    name: "Binance Smart Chain",
-    network: "Binance",
-    iconUrl: "https://bscxplorer.com/static/favicon/BSC/logo.svg",
-    iconBackground: "#fff",
-    nativeCurrency: {
-      decimals: 18,
-      name: "Smart Chain",
-      symbol: "BNB",
-    },
-    rpcUrls: {
-      default: "https://data-seed-prebsc-1-s1.binance.org:8545",
-    },
-    blockExplorers: {
-      default: { name: "SnowTrace", url: "https://testnet.bscscan.com" },
-      etherscan: { name: "SnowTrace", url: "https://testnet.bscscan.com" },
-    },
-    testnet: true,
-  };
+  // const BinanceChain = {
+  //   id: 97,
+  //   name: "Binance Smart Chain",
+  //   network: "Binance",
+  //   iconUrl: "https://bscxplorer.com/static/favicon/BSC/logo.svg",
+  //   iconBackground: "#fff",
+  //   nativeCurrency: {
+  //     decimals: 18,
+  //     name: "Smart Chain",
+  //     symbol: "BNB",
+  //   },
+  //   rpcUrls: {
+  //     default: "https://data-seed-prebsc-1-s1.binance.org:8545",
+  //   },
+  //   blockExplorers: {
+  //     default: { name: "SnowTrace", url: "https://testnet.bscscan.com" },
+  //     etherscan: { name: "SnowTrace", url: "https://testnet.bscscan.com" },
+  //   },
+  //   testnet: true,
+  // };
 
   const { chains, provider } = configureChains(
-    [BinanceChain, chain.goerli],
+    [chain.goerli],
     [
       alchemyProvider({ alchemyId: "gFZetYQhmO8gDbZM_nss4JLAfCgZFUim" }),
       publicProvider(),
