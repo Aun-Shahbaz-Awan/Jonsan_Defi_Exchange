@@ -92,28 +92,17 @@ export default function BorrowTokenPopup({
                       </span>
                       <span className="text-xs">
                         Account Interest:{" "}
-                        {collateral >= parseInt(interestRates[4]?._hex, 16) &&
-                        collateral <= parseInt(interestRates[5]?._hex, 16)
+                        {collateral >= 200 && collateral <= 500
                           ? parseInt(interestRates[0]?._hex, 16) / 100 + "%"
-                          : collateral >=
-                              parseInt(interestRates[4]?._hex, 16) &&
-                            collateral < parseInt(interestRates[5]?._hex, 16)
+                          : collateral >= 190 && collateral < 200
                           ? parseInt(interestRates[1]?._hex, 16) / 100 + "%"
-                          : collateral >=
-                              parseInt(interestRates[3]?._hex, 16) &&
-                            collateral < parseInt(interestRates[4]?._hex, 16)
+                          : collateral >= 170 && collateral < 190
                           ? parseInt(interestRates[2]?._hex, 16) / 100 + "%"
-                          : collateral >=
-                              parseInt(interestRates[2]?._hex, 16) &&
-                            collateral < parseInt(interestRates[3]?._hex, 16)
+                          : collateral >= 150 && collateral < 170
                           ? parseInt(interestRates[3]?._hex, 16) / 100 + "%"
-                          : collateral >=
-                              parseInt(interestRates[1]?._hex, 16) &&
-                            collateral < parseInt(interestRates[2]?._hex, 16)
+                          : collateral >= 130 && collateral < 150
                           ? parseInt(interestRates[4]?._hex, 16) / 100 + "%"
-                          : collateral >=
-                              parseInt(interestRates[0]?._hex, 16) &&
-                            collateral < parseInt(interestRates[1]?._hex, 16)
+                          : collateral >= 120 && collateral < 130
                           ? parseInt(interestRates[5]?._hex, 16) / 100 + "%"
                           : "Invalid"}
                       </span>
@@ -165,26 +154,12 @@ export default function BorrowTokenPopup({
                             value={collateral}
                             onChange={(e) => setCollateral(e.target.value)}
                             onBlur={(e) => {
-                              if (
-                                e.target.value <
-                                parseInt(interestRates[0]?._hex, 16)
-                              )
-                                setCollateral(
-                                  parseInt(interestRates[0]?._hex, 16)
-                                );
-                              else if (
-                                e.target.value >
-                                parseInt(interestRates[5]?._hex, 16)
-                              )
-                                setCollateral(
-                                  parseInt(interestRates[5]?._hex, 16)
-                                );
+                              if (e.target.value < 120) setCollateral(120);
+                              else if (e.target.value > 500) setCollateral(500);
                               else setCollateral(e.target.value);
                             }}
                             className={`w-7/12 text-sm outline-none rounded-full px-3 py-1 ${
-                              collateral >=
-                                parseInt(interestRates[0]?._hex, 16) &&
-                              collateral <= parseInt(interestRates[5]?._hex, 16)
+                              collateral >= 120 && collateral <= 500
                                 ? "border border-green-400"
                                 : "border border-red-400"
                             }`}

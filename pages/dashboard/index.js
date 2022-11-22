@@ -712,7 +712,7 @@ function Index() {
                 <BsArrowRight />
               </span>
               {/* {isLoaded ? parseInt(borrowInfo[4], 10) : "Loading..."} */}
-              {/* {isLoaded
+              {isLoaded
                 ? parseInt(borrowInfo[2], 10) >= 200 &&
                   parseInt(borrowInfo[2], 10) <= 500
                   ? parseInt(interestRateInfo[0], 10) / 100 + "%"
@@ -732,8 +732,8 @@ function Index() {
                     parseInt(borrowInfo[2], 10) <= 130
                   ? parseInt(interestRateInfo[5], 10) / 100 + "%"
                   : "Invalid Collateral"
-                : "Loading..."} */}
-              {isLoaded
+                : "Loading..."}
+              {/* {isLoaded
                 ? parseInt(borrowInfo[2], 10) >=
                     parseInt(interestRateInfo[4], 10) &&
                   parseInt(borrowInfo[2], 10) <=
@@ -765,7 +765,7 @@ function Index() {
                       parseInt(interestRateInfo[1], 10)
                   ? parseInt(interestRateInfo[5], 10) / 100 + "%"
                   : "Invalid Collateral"
-                : "Loading..."}
+                : "Loading..."} */}
             </p>
             {/* <p className="flex items-center leading-8 font-medium cursor-pointer hover:gap-1">
               Total Interest

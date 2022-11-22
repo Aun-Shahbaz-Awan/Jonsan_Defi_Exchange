@@ -25,7 +25,7 @@ export default function Home() {
   const { data: signer } = useSigner();
   const { address } = useAccount();
 
-  const [collateral, setCollateral] = React.useState(0);
+  const [collateral, setCollateral] = React.useState(120);
   const [interestRates, setInterestRates] = React.useState([]);
   const [borrowInfo, setBorrowInfo] = React.useState({
     openStatus: false,
@@ -83,13 +83,7 @@ export default function Home() {
   const getInterestRates = async () => {
     await ExchangeContract?.getInterestRates()
       .then((responce) => {
-        // console.log("Interest Rates:", responce);
         setInterestRates(responce);
-        setCollateral(parseInt(responce[0]?._hex, 16));
-        // setCategoryInfo((categoryInfo) => ({
-        //   ...categoryInfo,
-        //   ETHRate: parseInt(responce?._hex),
-        // }));
       })
       .catch((error) => {
         toast.error("Borrow BTC Rate Error :", error?.error?.message);
@@ -268,6 +262,7 @@ export default function Home() {
   //   // eslint-disable-next-line react-hooks/exhaustive-deps
   // }, []);
 
+  console.log("Collateral:", collateral);
   return (
     <div className="">
       <Head>
