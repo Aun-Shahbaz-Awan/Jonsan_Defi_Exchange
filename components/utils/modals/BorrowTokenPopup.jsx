@@ -86,9 +86,39 @@ export default function BorrowTokenPopup({
                       </span>
                       <span>GUSD</span>
                     </div>
-                    <span>
-                      Paying Amount <span className="text-red-500">*</span>
-                    </span>
+                    <div className="flex justify-between items-center">
+                      <span>
+                        Paying Amount <span className="text-red-500">*</span>
+                      </span>
+                      <span className="text-xs">
+                        Account Interest:{" "}
+                        {collateral >= parseInt(interestRates[4]?._hex, 16) &&
+                        collateral <= parseInt(interestRates[5]?._hex, 16)
+                          ? parseInt(interestRates[0]?._hex, 16) / 100 + "%"
+                          : collateral >=
+                              parseInt(interestRates[4]?._hex, 16) &&
+                            collateral < parseInt(interestRates[5]?._hex, 16)
+                          ? parseInt(interestRates[1]?._hex, 16) / 100 + "%"
+                          : collateral >=
+                              parseInt(interestRates[3]?._hex, 16) &&
+                            collateral < parseInt(interestRates[4]?._hex, 16)
+                          ? parseInt(interestRates[2]?._hex, 16) / 100 + "%"
+                          : collateral >=
+                              parseInt(interestRates[2]?._hex, 16) &&
+                            collateral < parseInt(interestRates[3]?._hex, 16)
+                          ? parseInt(interestRates[3]?._hex, 16) / 100 + "%"
+                          : collateral >=
+                              parseInt(interestRates[1]?._hex, 16) &&
+                            collateral < parseInt(interestRates[2]?._hex, 16)
+                          ? parseInt(interestRates[4]?._hex, 16) / 100 + "%"
+                          : collateral >=
+                              parseInt(interestRates[0]?._hex, 16) &&
+                            collateral < parseInt(interestRates[1]?._hex, 16)
+                          ? parseInt(interestRates[5]?._hex, 16) / 100 + "%"
+                          : "Invalid"}
+                      </span>
+                    </div>
+
                     <div className="flex justify-between items-center border border-gray-400 rounded-lg mt-1">
                       <input
                         value={borrowInfo?.token}
