@@ -713,23 +713,23 @@ function Index() {
               </span>
               {/* {isLoaded ? parseInt(borrowInfo[4], 10) : "Loading..."} */}
               {isLoaded
-                ? parseInt(borrowInfo[2], 10) >= 200 &&
+                ? parseInt(borrowInfo[2], 10) >= 401 &&
                   parseInt(borrowInfo[2], 10) <= 500
                   ? parseInt(interestRateInfo[0], 10) / 100 + "%"
-                  : parseInt(borrowInfo[2], 10) >= 190 &&
-                    parseInt(borrowInfo[2], 10) < 200
+                  : parseInt(borrowInfo[2], 10) >= 301 &&
+                    parseInt(borrowInfo[2], 10) < 401
                   ? parseInt(interestRateInfo[1], 10) / 100 + "%"
-                  : parseInt(borrowInfo[2], 10) >= 170 &&
-                    parseInt(borrowInfo[2], 10) <= 190
+                  : parseInt(borrowInfo[2], 10) >= 251 &&
+                    parseInt(borrowInfo[2], 10) <= 301
                   ? parseInt(interestRateInfo[2], 10) / 100 + "%"
-                  : parseInt(borrowInfo[2], 10) >= 150 &&
-                    parseInt(borrowInfo[2], 10) < 170
+                  : parseInt(borrowInfo[2], 10) >= 201 &&
+                    parseInt(borrowInfo[2], 10) < 251
                   ? parseInt(interestRateInfo[3], 10) / 100 + "%"
-                  : parseInt(borrowInfo[2], 10) >= 130 &&
-                    parseInt(borrowInfo[2], 10) <= 150
+                  : parseInt(borrowInfo[2], 10) >= 171 &&
+                    parseInt(borrowInfo[2], 10) <= 201
                   ? parseInt(interestRateInfo[4], 10) / 100 + "%"
                   : parseInt(borrowInfo[2], 10) >= 120 &&
-                    parseInt(borrowInfo[2], 10) <= 130
+                    parseInt(borrowInfo[2], 10) <= 171
                   ? parseInt(interestRateInfo[5], 10) / 100 + "%"
                   : "Invalid Collateral"
                 : "Loading..."}

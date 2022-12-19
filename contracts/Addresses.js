@@ -5,5 +5,5 @@
 // Goerli Testnet
 export const GUSD_Address = "0x94CBd329BDEC2C0bd4c2ace4e5EC3896f82FDe4C";
 export const TESTBTC_Address = "0xDba17fF79fC903Fab8892133E18515eDeFD4D31e";
-export const TESTETH_Address = "0x1bcd21eA3BD9673010C1854e860c4813c7447F13";
+// export const TESTETH_Address = "0x1bcd21eA3BD9673010C1854e860c4813c7447F13";
 export const Exchange_Address = "0xEf25A0452aE11C41CB078FE7728acBBC30a371c0";
