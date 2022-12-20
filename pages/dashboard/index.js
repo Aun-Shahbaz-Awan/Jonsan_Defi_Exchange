@@ -9,11 +9,11 @@ import {
   // TESTETH_Address,
   Exchange_Address,
 } from "./../../contracts/Addresses";
-import { Token_Abi, Exchange_Abi } from "../../contracts/Abis";
+import { Token_Abi, StableCoin_Abi, Exchange_Abi } from "../../contracts/Abis";
 // Headless UI
 import { Listbox, Transition } from "@headlessui/react";
 import { BiCheck, BiChevronsDown } from "react-icons/bi";
-import { Switch } from "@headlessui/react";
+// import { Switch } from "@headlessui/react";
 import { Tab } from "@headlessui/react";
 // Toast
 import { ToastContainer, toast } from "react-toastify";
@@ -53,7 +53,7 @@ function Index() {
     // TESTETHContract,
     ExchangeContract = "";
   if (signer) {
-    GUSDContract = new ethers.Contract(GUSD_Address, Token_Abi, signer);
+    GUSDContract = new ethers.Contract(GUSD_Address, StableCoin_Abi, signer);
     TESTBNBContract = new ethers.Contract(TESTBTC_Address, Token_Abi, signer);
     // TESTETHContract = new ethers.Contract(TESTETH_Address, Token_Abi, signer);
     ExchangeContract = new ethers.Contract(
@@ -488,7 +488,7 @@ function Index() {
       }
     );
   };
-  // Widthdraw Tokens(GUST) ================================>>>
+  // Widthdraw Tokens(AmerG) ================================>>>
   const handleWithdrawTokens = () => {
     toast.promise(
       ExchangeContract?.withdrawTokens(BigInt(withdrawTokensAmount * 1e18))
@@ -672,7 +672,7 @@ function Index() {
             </div>
 
             <p className="flex items-center leading-8 font-medium cursor-pointer hover:gap-1">
-              Total Borrowed GUST
+              Total Borrowed AmerG
               <span className="mx-2">
                 <BsArrowRight />
               </span>
@@ -772,7 +772,7 @@ function Index() {
               <span className="mx-2">
                 <BsArrowRight />
               </span>
-              {isLoaded ? totalInterest / 1e18 + " GUST" : "Loading..."}
+              {isLoaded ? totalInterest / 1e18 + " AmerG" : "Loading..."}
             </p> */}
             <div className="flex flex-col md:flex-row items-center md:justify-between leading-8 mt-4 font-medium cursor-pointer hover:gap-1">
               <div>
@@ -786,7 +786,7 @@ function Index() {
                   "Loading..."
                 )}
 
-                <span className="ml-3">GUST</span>
+                <span className="ml-3">AmerG</span>
               </div>
 
               <button
@@ -859,7 +859,7 @@ function Index() {
                     {isLoaded
                       ? "(" +
                         parseInt(borrowInfo[0], 10) / 1e18 +
-                        " GUST Available)"
+                        " AmerG Available)"
                       : "(Loading...)"}
                   </label>
                   <input
@@ -1115,15 +1115,15 @@ function Index() {
               </div>
               {/* withdrawTokens */}
               <div className="px-6 py-6 border border-gray-400 rounded-xl">
-                <h6 className="text-xl font-medium">Withdraw Tokens (GUST)</h6>
+                <h6 className="text-xl font-medium">Withdraw Tokens (AmerG)</h6>
                 <p className="text-gray-600 text-sm my-auto pb-2">
-                  You can widthdraw Tokens(GUST) form here.
+                  You can widthdraw Tokens(AmerG) form here.
                 </p>
                 <div className="flex flex-col md:flex-row mb-4 w-full">
                   <div className="flex flex-col w-full">
                     <label className="text-xs text-gray-600 mb-1">Amount</label>
                     <input
-                      placeholder="Enter GUST Amount"
+                      placeholder="Enter AmerG Amount"
                       value={withdrawTokensAmount}
                       onChange={(e) => {
                         setWithdrawTokensAmount(e.target.value);

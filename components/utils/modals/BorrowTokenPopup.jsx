@@ -84,7 +84,7 @@ export default function BorrowTokenPopup({
                       <span className="font-semibbold text-gray-600">
                         Token
                       </span>
-                      <span>GUSD</span>
+                      <span>AmerG</span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span>
@@ -228,7 +228,7 @@ export default function BorrowTokenPopup({
                           ? (borrowInfo?.tokens * categoryInfo?.BTCRate) /
                             (collateral / 100)
                           : "Loading..."}{" "}
-                        GUSD
+                        AmerG
                       </span>
                     </div>
                   </div>
@@ -259,7 +259,7 @@ export default function BorrowTokenPopup({
                         }));
                       }}
                     >
-                      Borrow GUSD
+                      Borrow AmerG
                     </button>
                   </div>
                 </Dialog.Panel>

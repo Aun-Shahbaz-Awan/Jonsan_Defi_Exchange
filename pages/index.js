@@ -8,7 +8,7 @@ import {
   // TESTETH_Address,
   Exchange_Address,
 } from "./../contracts/Addresses";
-import { Token_Abi, Exchange_Abi } from "../contracts/Abis";
+import { Token_Abi, StableCoin_Abi, Exchange_Abi } from "../contracts/Abis";
 // COMP.
 import Head from "next/head";
 import FAQ from "../components/home/FAQ";
@@ -43,7 +43,7 @@ export default function Home() {
     // TESTETHContract,
     ExchangeContract = "";
   if (signer) {
-    GUSDContract = new ethers.Contract(GUSD_Address, Token_Abi, signer);
+    GUSDContract = new ethers.Contract(GUSD_Address, StableCoin_Abi, signer);
     TESTBTCContract = new ethers.Contract(TESTBTC_Address, Token_Abi, signer);
     // TESTETHContract = new ethers.Contract(TESTETH_Address, Token_Abi, signer);
     ExchangeContract = new ethers.Contract(
