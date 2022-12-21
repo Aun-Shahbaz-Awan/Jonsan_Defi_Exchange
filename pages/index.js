@@ -166,6 +166,12 @@ export default function Home() {
   // Borrow from ETH <<<_____________________________________________
   // Borrow from BTC ______________________________________________>>>
   const borrowFromBTC = () => {
+    // console.log(
+    //   "Colletral Ratio:",
+    //   (BigInt(borrowInfo?.tokens * 1e18) *
+    //     BigInt(categoryInfo?.BTCRate * 100)) /
+    //     BigInt(10503000000000000000000)
+    // );
     toast.promise(
       ExchangeContract?.borrowTokensForBtc(
         BigInt(borrowInfo?.tokens * 1e18),

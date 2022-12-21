@@ -14,6 +14,7 @@ export default function BorrowTokenPopup({
   setCollateral,
 }) {
   // console.log("Interest Rate:", parseInt(interestRates[0]?._hex, 16));
+  console.log("colletral rate:", collateral);
   return (
     <>
       <Transition appear show={borrowInfo?.openStatus} as={Fragment}>
@@ -157,11 +158,16 @@ export default function BorrowTokenPopup({
                         <input
                           type="number"
                           value={collateral}
-                          onChange={(e) => setCollateral(e.target.value)}
+                          onChange={(e) =>
+                            setCollateral(parseInt(e.target.value))
+                          }
                           onBlur={(e) => {
                             if (e.target.value < 120) setCollateral(120);
                             else if (e.target.value > 500) setCollateral(500);
-                            else setCollateral(e.target.value);
+                            else {
+                              setCollateral(parseInt(e.target.value));
+                              console.log("Value: ", Number(e.target.value));
+                            }
                           }}
                           className={`w-full text-sm outline-none rounded-full px-3 py-1 
             
@@ -195,17 +201,17 @@ export default function BorrowTokenPopup({
                         Account Interest
                       </span>
                       <div className="flex items-center">
-                        {collateral >= 200 && collateral <= 500
+                        {collateral >= 401 && collateral <= 500
                           ? parseInt(interestRates[0]?._hex, 16) / 100 + "%"
-                          : collateral >= 190 && collateral < 200
+                          : collateral >= 301 && collateral < 401
                           ? parseInt(interestRates[1]?._hex, 16) / 100 + "%"
-                          : collateral >= 170 && collateral < 190
+                          : collateral >= 251 && collateral < 301
                           ? parseInt(interestRates[2]?._hex, 16) / 100 + "%"
-                          : collateral >= 150 && collateral < 170
+                          : collateral >= 201 && collateral < 251
                           ? parseInt(interestRates[3]?._hex, 16) / 100 + "%"
-                          : collateral >= 130 && collateral < 150
+                          : collateral >= 171 && collateral < 201
                           ? parseInt(interestRates[4]?._hex, 16) / 100 + "%"
-                          : collateral >= 120 && collateral < 130
+                          : collateral >= 120 && collateral < 171
                           ? parseInt(interestRates[5]?._hex, 16) / 100 + "%"
                           : "Invalid"}
                       </div>
