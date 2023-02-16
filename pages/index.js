@@ -5,10 +5,20 @@ import { useSigner, useAccount } from "wagmi";
 import {
   GUSD_Address,
   TESTBTC_Address,
-  // TESTETH_Address,
   Exchange_Address,
+  AmerG_Address,
+  TWBTC_Address,
+  ETHVault_Address,
+  BTCVault_Address,
 } from "./../contracts/Addresses";
 import { Token_Abi, StableCoin_Abi, Exchange_Abi } from "../contracts/Abis";
+// V2 ------------------------------
+import {
+  AmerG_ABI,
+  TWBTC_ABI,
+  ETH_Vault_ABI,
+  BTC_Vault_ABI,
+} from "../contracts/AbisNew";
 // COMP.
 import Head from "next/head";
 import FAQ from "../components/home/FAQ";
@@ -18,13 +28,13 @@ import BorrowTokenPopup from "../components/utils/modals/BorrowTokenPopup";
 // TOAST
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { borrowFromBTC, borrowFromETH } from "../services/handleBorrow";
 // Loader
 // import ScaleLoader from "react-spinners/ScaleLoader";
 
 export default function Home() {
   const { data: signer } = useSigner();
   const { address } = useAccount();
-
   const [collateral, setCollateral] = React.useState(120);
   const [interestRates, setInterestRates] = React.useState([]);
   const [borrowInfo, setBorrowInfo] = React.useState({
@@ -40,15 +50,32 @@ export default function Home() {
 
   let GUSDContract,
     TESTBTCContract,
-    // TESTETHContract,
     ExchangeContract = "";
   if (signer) {
     GUSDContract = new ethers.Contract(GUSD_Address, StableCoin_Abi, signer);
     TESTBTCContract = new ethers.Contract(TESTBTC_Address, Token_Abi, signer);
-    // TESTETHContract = new ethers.Contract(TESTETH_Address, Token_Abi, signer);
     ExchangeContract = new ethers.Contract(
       Exchange_Address,
       Exchange_Abi,
+      signer
+    );
+  }
+  // V2 ----------------------------------------------------------------
+  let AmerGContract,
+    TWBTCContract,
+    ETHVaultContract,
+    BTCVaultContract = "";
+  if (signer) {
+    AmerGContract = new ethers.Contract(AmerG_Address, AmerG_ABI, signer);
+    TWBTCContract = new ethers.Contract(TWBTC_Address, TWBTC_ABI, signer);
+    ETHVaultContract = new ethers.Contract(
+      ETHVault_Address,
+      ETH_Vault_ABI,
+      signer
+    );
+    BTCVaultContract = new ethers.Contract(
+      BTCVault_Address,
+      BTC_Vault_ABI,
       signer
     );
   }
@@ -89,155 +116,90 @@ export default function Home() {
         toast.error("Borrow BTC Rate Error :", error?.error?.message);
       });
   };
-  // Borrow from ETH ______________________________________________>>>
-  const borrowFromETH = () => {
-    toast.promise(
-      ExchangeContract?.borrowTokensForEth(
-        BigInt(
-          (categoryInfo?.ETHRate * borrowInfo?.tokens * 1e18) /
-            ((collateral + 1) / 100)
-        ),
-        {
-          value: ethers.utils.parseEther(borrowInfo?.tokens.toString()),
-        }
-      )
-        .then((tx) =>
-          toast.promise(
-            tx.wait().then((responce) => {
-              console.log("Final Borrow Responce:", responce);
-              toast.success("Borrow Successfully 🥳🎉🎊!");
-            }),
-            {
-              pending: "Please wait borrow in process!",
-              error: "Transction Rejected 😏💔",
-            }
-          )
-        )
-        .catch((error) => {
-          console.log("Borrow Error:", error);
-          toast.error(error?.message);
-          toast.error(error?.error?.data?.message);
-        }),
-      {
-        pending: "Waiting for Borrow Tx. to Accept!",
-        error: "Transction Rejected 😏💔",
-      }
-    );
-  };
+  // Borrow from ETH ____________________________________________________________________________|
   const handleBorrowFromETH = () => {
-    // TESTETHContract?.allowance(
-    //   address,
-    //   "0x802304d9715F2E49878d151cf51b0A6e3B04f5c3"
-    // )
-    //   .then((responce) => {
-    //     if (
-    //       BigInt(parseInt(responce._hex)) < BigInt(borrowInfo?.tokens * 1e18)
-    //     ) {
-    //       toast.promise(
-    //         TESTETHContract?.approve(
-    //           Exchange_Address,
-    //           BigInt(borrowInfo?.tokens * 1e18)
-    //         )
-    //           .then((tx) => {
-    //             toast.promise(
-    //               tx.wait().then((responce) => {
-    borrowFromETH();
-    //             }),
-    //             {
-    //               pending: "Please wait allowance in process!",
-    //               error: "Something wrong with Allowance 😏💔",
-    //             }
-    //           );
-    //         })
-    //         .catch((error) => {
-    //           toast.error(error?.error?.message);
-    //         }),
-    //       {
-    //         pending: "Step 1 of 2: Waiting for Allowance Tx. to Accept!",
-    //         error: "Something wrong with Borrow 😏💔",
-    //       }
-    //     );
-    //   } else {
-    //     borrowFromETH();
-    //   }
-    // })
-    // .catch((err) => console.log(err));
+    borrowFromETH(ETHVaultContract, categoryInfo, borrowInfo, collateral);
   };
-  // Borrow from ETH <<<_____________________________________________
-  // Borrow from BTC ______________________________________________>>>
-  const borrowFromBTC = () => {
-    // console.log(
-    //   "Colletral Ratio:",
-    //   (BigInt(borrowInfo?.tokens * 1e18) *
-    //     BigInt(categoryInfo?.BTCRate * 100)) /
-    //     BigInt(10503000000000000000000)
-    // );
-    toast.promise(
-      ExchangeContract?.borrowTokensForBtc(
-        BigInt(borrowInfo?.tokens * 1e18),
-        BigInt(
-          (categoryInfo?.BTCRate * borrowInfo?.tokens * 1e18) /
-            ((collateral + 1) / 100)
-        )
-      )
-        .then((tx) =>
-          toast.promise(
-            tx.wait().then((responce) => {
-              console.log("Final Responce:", responce);
-              toast.success("Borrow Successfully 🥳🎉🎊!");
-            }),
-            {
-              pending: "Please wait borrow in process!",
-              error: "Transction Rejected 😏💔",
-            }
-          )
-        )
-        .catch((error) => {
-          console.log("Borrow Error:", error);
-          toast.error(error?.error?.data?.message);
-        }),
-      {
-        pending: "Step 2 of 2: Waiting for Borrow Tx. to Accept!",
-        error: "Transction Rejected 😏💔",
-      }
+  // Borrow from BTC ____________________________________________________________________________|
+  const handleBorrowFromBTC = () => {
+    borrowFromBTC(
+      TWBTCContract,
+      BTCVaultContract,
+      BTCVault_Address,
+      address,
+      categoryInfo,
+      borrowInfo,
+      collateral
     );
   };
-  const handleBorrowFromBTC = () => {
-    TESTBTCContract?.allowance(address, Exchange_Address)
-      .then((responce) => {
-        if (
-          BigInt(parseInt(responce._hex)) < BigInt(borrowInfo?.tokens * 1e18)
-        ) {
-          toast.promise(
-            TESTBTCContract?.approve(
-              Exchange_Address,
-              BigInt(borrowInfo?.tokens * 1e18)
-            )
-              .then((tx) => {
-                toast.promise(
-                  tx.wait().then((responce) => {
-                    borrowFromBTC();
-                  }),
-                  {
-                    pending: "Please wait allowance in process!",
-                    error: "Something wrong with Allowance 😏💔",
-                  }
-                );
-              })
-              .catch((error) => {
-                toast.error(error?.error?.message);
-              }),
-            {
-              pending: "Step 1 of 2: Waiting for Allowance Tx. to Accept!",
-              error: "Something wrong with Borrow 😏💔",
-            }
-          );
-        } else {
-          borrowFromBTC();
-        }
-      })
-      .catch((err) => console.log(err));
-  };
+  // Borrow from BTC ______________________________________________>>>
+  // const borrowFromBTC = () => {
+  //   toast.promise(
+  //     ExchangeContract?.borrowTokensForBtc(
+  //       BigInt(borrowInfo?.tokens * 1e18),
+  //       BigInt(
+  //         (categoryInfo?.BTCRate * borrowInfo?.tokens * 1e18) /
+  //           ((collateral + 1) / 100)
+  //       )
+  //     )
+  //       .then((tx) =>
+  //         toast.promise(
+  //           tx.wait().then((responce) => {
+  //             console.log("Final Responce:", responce);
+  //             toast.success("Borrow Successfully 🥳🎉🎊!");
+  //           }),
+  //           {
+  //             pending: "Please wait borrow in process!",
+  //             error: "Transction Rejected 😏💔",
+  //           }
+  //         )
+  //       )
+  //       .catch((error) => {
+  //         console.log("Borrow Error:", error);
+  //         toast.error(error?.error?.data?.message);
+  //       }),
+  //     {
+  //       pending: "Step 2 of 2: Waiting for Borrow Tx. to Accept!",
+  //       error: "Transction Rejected 😏💔",
+  //     }
+  //   );
+  // };
+  // const handleBorrowFromBTC = () => {
+  //   TESTBTCContract?.allowance(address, Exchange_Address)
+  //     .then((responce) => {
+  //       if (
+  //         BigInt(parseInt(responce._hex)) < BigInt(borrowInfo?.tokens * 1e18)
+  //       ) {
+  //         toast.promise(
+  //           TESTBTCContract?.approve(
+  //             Exchange_Address,
+  //             BigInt(borrowInfo?.tokens * 1e18)
+  //           )
+  //             .then((tx) => {
+  //               toast.promise(
+  //                 tx.wait().then((responce) => {
+  //                   borrowFromBTC();
+  //                 }),
+  //                 {
+  //                   pending: "Please wait allowance in process!",
+  //                   error: "Something wrong with Allowance 😏💔",
+  //                 }
+  //               );
+  //             })
+  //             .catch((error) => {
+  //               toast.error(error?.error?.message);
+  //             }),
+  //           {
+  //             pending: "Step 1 of 2: Waiting for Allowance Tx. to Accept!",
+  //             error: "Something wrong with Borrow 😏💔",
+  //           }
+  //         );
+  //       } else {
+  //         borrowFromBTC();
+  //       }
+  //     })
+  //     .catch((err) => console.log(err));
+  // };
   // Borrow from BTC <<<_____________________________________________
   const handlePackagePopupButton = () => {
     // Borrow From BTC

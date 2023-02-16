@@ -20,10 +20,8 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 // Loader
 import ScaleLoader from "react-spinners/ScaleLoader";
-// import ETHBoard from "../../components/dashboard/ETHBoard";
-import WBTCBoard from "../../components/dashboard/WBTCBoard";
 
-function Index() {
+function ETHBoard() {
   const { data: signer } = useSigner();
   const { address } = useAccount();
   // Select BTC Id
@@ -150,7 +148,6 @@ function Index() {
       }
     );
   };
-
   const handlePayInterest = () => {
     GUSDContract?.allowance(
       address,
@@ -1088,9 +1085,8 @@ function Index() {
           <></>
         )}
       </div>
-      <WBTCBoard />
     </React.Fragment>
   );
 }
 
-export default Index;
+export default ETHBoard;

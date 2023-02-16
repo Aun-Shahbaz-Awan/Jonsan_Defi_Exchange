@@ -45,23 +45,6 @@ let categoryOneDetails = [
     bgColor: "bg-c_yellow-light",
     cardColor: "bg-c_yellow-dark",
   },
-  // {
-  //   id: "multiple3",
-  //   title: "Lowest stETH borrowing cost",
-  //   description:
-  //     "Great for Borrowing or Multiplying while earning staking rewards",
-  //   icon: FaPushed,
-  //   unit: "WSTETH",
-  //   with: 116,
-  //   upto: 502.28,
-  //   MM: "4.33x",
-  //   CLA: "25.64M",
-  //   VAF: "3.00%",
-  //   Protocol: "Maker (ETH-B)",
-  //   button: "Coming Soon",
-  //   bgColor: "bg-c_blue-light",
-  //   cardColor: "bg-c_blue-dark",
-  // },
 ];
 let categoryTwoDetails = [
   // {
