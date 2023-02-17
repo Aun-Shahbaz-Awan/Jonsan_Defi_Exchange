@@ -48,12 +48,6 @@ const handleBorrowFromBTC = (
   borrowInfo,
   collateral
 ) => {
-  // console.log(
-  //   "AmerG Value:",
-  //   BigInt(
-  //     (borrowInfo?.tokens * 1e18 * categoryInfo?.BTCRate) / (collateral / 100)
-  //   )
-  // );
   toast.promise(
     TWBTCVaultContract?.createVault(
       BigInt(borrowInfo?.tokens * 1e8),

@@ -31,6 +31,8 @@ function WBTCBoard() {
   const [interestRateInfo, setInterestRateInfo] = useState([]);
   const [refinancePercentage, setRefinancePercentage] = useState(0);
   const [reimburseAmount, setReimburseAmount] = useState(0);
+  const [btcExchangeRate, setBtcExchangeRate] = useState(0);
+  const [addWBTCAmount, setAddWBTCAmount] = useState(0);
 
   let AmerGContract,
     TWBTCContract,
@@ -200,6 +202,86 @@ function WBTCBoard() {
       })
       .catch((err) => console.log("Find total Allowance Error:", err));
   };
+  // Collateral ================================================= [Collateral]
+  const handleWBTCDepositToVault = () => {
+    toast.promise(
+      VaultContract?.depositToVault(
+        selectedVault,
+        BigInt(addWBTCAmount * 1e8),
+        BigInt(
+          (addWBTCAmount * 1e18 * btcExchangeRate) /
+            (parseInt(vaultInfo[2], 10) / 100)
+        )
+      )
+        .then((tx) => {
+          setIsLoaded(false);
+          toast.promise(
+            tx.wait().then((responce) => {
+              setIsLoaded(true);
+              console.log("Final Responce:", responce);
+              toast.success("Borrow Successfully 🥳🎉🎊!");
+            }),
+            {
+              pending: "Please wait borrow in process!",
+              error: "Transction Rejected 😏💔",
+            }
+          );
+        })
+        .catch((error) => {
+          console.log("Borrow Error:", error);
+          toast.error(error?.error?.data?.message);
+          toast.error(error?.error?.message);
+        }),
+      {
+        pending: "Step 2 of 2: Waiting for Borrow Tx. to Accept!",
+        error: "Transction Rejected 😏💔",
+      }
+    );
+  };
+
+  const handleDepositToVault = () => {
+    TWBTCContract?.allowance(address, BTCVault_Address)
+      .then((responce) => {
+        console.log("Borrow From BTC: Before IF!:", parseInt(responce._hex));
+        console.log("Current Allowance:", BigInt(parseInt(responce._hex)));
+        if (
+          BigInt(parseInt(responce._hex)) <
+          BigInt(parseInt(addWBTCAmount * 1e8))
+        ) {
+          toast.promise(
+            TWBTCContract?.approve(
+              BTCVault_Address,
+              BigInt(parseInt(addWBTCAmount * 1e8))
+            )
+              .then((tx) => {
+                toast.promise(
+                  tx.wait().then((responce) => {
+                    console.log("Welcome to Borrow: Approved!");
+                    // ---------------------------------------------------------------- [ Now Borrow -> ]
+                    handleWBTCDepositToVault();
+                    // ---------------------------------------------------------------- [ Now Borrow <- ]
+                  }),
+                  {
+                    pending: "Please wait allowance in process!",
+                    error: "Something wrong with Allowance 😏💔",
+                  }
+                );
+              })
+              .catch((error) => {
+                console.log("Approve Error:", error);
+                toast.error(error?.error?.message);
+              }),
+            {
+              pending: "Step 1 of 2: Waiting for Allowance Tx. to Accept!",
+              error: "Something wrong with Borrow 😏💔",
+            }
+          );
+        } else {
+          handleWBTCDepositToVault();
+        }
+      })
+      .catch((err) => console.log(err));
+  };
   // _________________________________ [Get All Vaults of User]
   const getAllVaults = () => {
     VaultContract.vaultsOf(address)
@@ -246,6 +328,14 @@ function WBTCBoard() {
       .then((info) => {
         console.log("Total Interest:", info);
         setTotalInterest(parseInt(info._hex, 16));
+      })
+      .catch((error) => {
+        console.log("getBorrowInfo Error:", error);
+      });
+    // _________ [Get Eth Exchange Rate]
+    VaultContract.btcExchangeRate()
+      .then((info) => {
+        setBtcExchangeRate(parseInt(info._hex, 16));
       })
       .catch((error) => {
         console.log("getBorrowInfo Error:", error);
@@ -420,6 +510,7 @@ function WBTCBoard() {
             </p>
             <div className="flex flex-col md:flex-row items-center md:justify-between leading-8 mt-4 font-medium cursor-pointer hover:gap-1">
               <div>
+                <h3 className="text-xs ml-1 mb-0.5">Acumulated Interest</h3>
                 {isLoaded ? (
                   <input
                     value={totalInterest / 1e18}
@@ -429,7 +520,6 @@ function WBTCBoard() {
                 ) : (
                   "Loading..."
                 )}
-
                 <span className="ml-3">AmerG</span>
               </div>
 
@@ -443,6 +533,53 @@ function WBTCBoard() {
           </div>
           {/* Column 2 */}
           <div>
+            {/* Column 2.0 */}
+            <div className="bg-gradient-to-r from-grad-three via-grad-two to-grad-one rounded-xl px-6 py-6 mb-8 shadow-xl">
+              {/* Collateral */}
+              <h6 className="text-xl font-medium">Collateral</h6>
+              <p className="text-gray-600 text-sm my-auto pb-2">
+                You can add more collateral into existing vault.
+              </p>
+
+              <div className="flex flex-col md:flex-row mb-4 w-full">
+                <div className="flex flex-col mr-4">
+                  <label className="text-xs text-gray-600 mb-1">Vault ID</label>
+                  <input
+                    value={selectedVault}
+                    disabled={true}
+                    className="bg-white rounded-lg border border-gray-300 px-4 py-1 outline-none w-20"
+                  />
+                </div>
+                <div className="flex flex-col w-full">
+                  <label className="text-xs text-gray-600 mb-1">
+                    You will get estimated:{" "}
+                    <span className="font-medium text-green-700">
+                      {" "}
+                      {parseFloat(
+                        (btcExchangeRate * addWBTCAmount) /
+                          (parseInt(vaultInfo[2], 10) / 100)
+                      ).toFixed(2)}{" "}
+                      AmerG
+                    </span>
+                  </label>
+                  <input
+                    placeholder="Enter WBTC Value"
+                    value={addWBTCAmount}
+                    // disabled={true}
+                    onChange={(e) => {
+                      setAddWBTCAmount(e.target.value);
+                    }}
+                    className="bg-white rounded-lg border border-gray-300 px-4 py-1 outline-none w-auto"
+                  />
+                </div>
+                <button
+                  onClick={() => handleDepositToVault()}
+                  className="bg-gradient-to-r from-grad-three via-grad-two to-grad-one text-primary border border-primary hover:scale-95 rounded-lg outline-none shadow-xl min-w-[6rem] py-1 px-2 mt-2 md:ml-4 md:mt-auto"
+                >
+                  Add
+                </button>
+              </div>
+            </div>
             {/* Column 2.1 */}
             <div className="bg-gradient-to-r from-grad-three via-grad-two to-grad-one rounded-xl px-6 py-6 mb-8 shadow-xl">
               {/* Refinance */}
@@ -475,7 +612,7 @@ function WBTCBoard() {
                 </div>
                 <button
                   onClick={() => handleRefinance()}
-                  className="bg-gradient-to-r from-grad-one via-grad-two to-grad-three text-primary border border-primary hover:scale-95 rounded-lg outline-none shadow-xl py-1 px-2 mt-2 md:ml-4 md:mt-auto"
+                  className="bg-gradient-to-r from-grad-one via-grad-two to-grad-three text-primary border border-primary hover:scale-95 rounded-lg outline-none shadow-xl min-w-[6rem]  py-1 px-2 mt-2 md:ml-4 md:mt-auto"
                 >
                   Update
                 </button>
@@ -499,7 +636,7 @@ function WBTCBoard() {
                 </div>
                 <div className="flex flex-col w-full">
                   <label className="text-xs text-gray-600 mb-1">
-                    Ammout{" "}
+                    Amount{" "}
                     {isLoaded
                       ? "(" +
                         parseInt(vaultInfo[0], 10) / 1e18 +
@@ -515,7 +652,7 @@ function WBTCBoard() {
                 </div>
                 <button
                   onClick={() => handleReimburse()}
-                  className="bg-gradient-to-r from-grad-one via-grad-two to-grad-three text-primary border border-primary hover:scale-95 rounded-lg outline-none shadow-xl py-1 px-2 mt-2 md:ml-4 md:mt-auto"
+                  className="bg-gradient-to-r from-grad-one via-grad-two to-grad-three text-primary border border-primary hover:scale-95 rounded-lg outline-none shadow-xl min-w-[6rem]  py-1 px-2 mt-2 md:ml-4 md:mt-auto"
                 >
                   Return
                 </button>

@@ -3,132 +3,52 @@ import { BsArrowRight } from "react-icons/bs";
 // Web 3
 import { ethers } from "ethers";
 import { useSigner, useAccount } from "wagmi";
-import {
-  GUSD_Address,
-  TESTBTC_Address,
-  // TESTETH_Address,
-  Exchange_Address,
-} from "./../../contracts/Addresses";
-import { Token_Abi, StableCoin_Abi, Exchange_Abi } from "../../contracts/Abis";
+import { AmerG_Address, ETHVault_Address } from "./../../contracts/Addresses";
 // Headless UI
 import { Listbox, Transition } from "@headlessui/react";
 import { BiCheck, BiChevronsDown } from "react-icons/bi";
-// import { Switch } from "@headlessui/react";
 import { Tab } from "@headlessui/react";
 // Toast
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 // Loader
 import ScaleLoader from "react-spinners/ScaleLoader";
+import { AmerG_ABI, ETH_Vault_ABI } from "../../contracts/AbisNew";
 
 function ETHBoard() {
   const { data: signer } = useSigner();
   const { address } = useAccount();
-  // Select BTC Id
   const [isLoaded, setIsLoaded] = React.useState(false);
-  const [BTCTxIds, setBTCTxIds] = React.useState([]);
-  const [selectedTxId, setSelectedTxId] = useState(0);
-  const [borrowInfo, setBorrowInfo] = useState([]);
+  const [userVaults, setUserVaults] = React.useState([]);
+  const [selectedVault, setSelectedVault] = React.useState(0);
+  const [vaultInfo, setVaultInfo] = React.useState([]);
+  const [totalInterest, setTotalInterest] = React.useState(0);
   const [interestRateInfo, setInterestRateInfo] = useState([]);
-  const [totalInterest, setTotalInterest] = useState(0);
   const [refinancePercentage, setRefinancePercentage] = useState(0);
   const [reimburseAmount, setReimburseAmount] = useState(0);
-  // OnlyOwner
-  const [ownerAddress, setOwnerAddress] = useState("");
-  const [isOwner, setIsOwner] = useState(false);
-  const [isBTCSelected, setIsBTCSelected] = useState(true);
-  const [returnCollateralTxId, setReturnCollateralTxId] = useState(0);
-  const [coldWalletAddress, setColdWalletAddress] = useState("");
-  const [refinanceFee, setRefinanceFee] = useState(0);
-  const [interestRates, setInterestRates] = useState("");
-  const [btcFeedAddress, setBtcFeedAddress] = useState("");
-  const [ethFeedAddress, setEthFeedAddress] = useState("");
-  // Withdraw - OnlyOwner
-  const [withdrawBtcAmount, setWithdrawBtcAmount] = useState(0);
-  const [withdrawEthAmount, setWithdrawEthAmount] = useState(0);
-  const [withdrawTokensAmount, setWithdrawTokensAmount] = useState(0);
+  const [ethExchangeRate, setEthExchangeRate] = useState(0);
+  const [addEthAmount, setAddEthAmount] = useState(0);
 
-  let GUSDContract,
-    TESTBNBContract,
-    // TESTETHContract,
-    ExchangeContract = "";
+  let AmerGContract,
+    VaultContract = "";
   if (signer) {
-    GUSDContract = new ethers.Contract(GUSD_Address, StableCoin_Abi, signer);
-    TESTBNBContract = new ethers.Contract(TESTBTC_Address, Token_Abi, signer);
-    // TESTETHContract = new ethers.Contract(TESTETH_Address, Token_Abi, signer);
-    ExchangeContract = new ethers.Contract(
-      Exchange_Address,
-      Exchange_Abi,
+    AmerGContract = new ethers.Contract(AmerG_Address, AmerG_ABI, signer);
+    VaultContract = new ethers.Contract(
+      ETHVault_Address,
+      ETH_Vault_ABI,
       signer
     );
   }
-
-  const getTxIds = () => {
-    if (isBTCSelected)
-      ExchangeContract.getBtcTxIds(address)
-        .then((txIds) => {
-          setBTCTxIds(txIds);
-          setSelectedTxId(parseInt(txIds, 10));
-          setIsLoaded(true);
-        })
-        .catch((error) => {
-          console.log("Error:", error);
-        });
-    else {
-      ExchangeContract.getEthTxIds(address)
-        .then((txIds) => {
-          setBTCTxIds(txIds);
-          setSelectedTxId(parseInt(txIds, 10));
-          setIsLoaded(true);
-        })
-        .catch((error) => {
-          console.log("Error:", error);
-        });
-    }
-  };
-  // Get Borrow Info =======================================>>>
-  const getBorrowInfo = () => {
-    ExchangeContract.owner()
-      .then((info) => {
-        setOwnerAddress(info);
-        address === info ? setIsOwner(true) : setIsOwner(false);
-        console.log("Is Owner:", isOwner);
-      })
-      .catch((error) => {
-        console.log("getBorrowInfo Error:", error);
-      });
-    ExchangeContract.getBorrowInfo(selectedTxId)
-      .then((info) => {
-        setBorrowInfo(info);
-      })
-      .catch((error) => {
-        console.log("getBorrowInfo Error:", error);
-      });
-    ExchangeContract.getTotalInterest(selectedTxId)
-      .then((info) => {
-        setTotalInterest(parseInt(info._hex, 16));
-      })
-      .catch((error) => {
-        console.log("getBorrowInfo Error:", error);
-      });
-    ExchangeContract.getInterestRates()
-      .then((info) => {
-        setInterestRateInfo(info);
-      })
-      .catch((error) => {
-        console.log("getBorrowInfo Error:", error);
-      });
-  };
-  // Pay Interest ==========================================>>>
+  // ______________________________________________________________________________ [ CALL ]
   const payInterest = () => {
     toast.promise(
-      ExchangeContract?.payInterest(selectedTxId)
+      VaultContract?.payInterest(selectedVault)
         .then((tx) => {
           setIsLoaded(false);
           toast.promise(
             tx.wait().then((responce) => {
               console.log("Final Responce:", responce);
-              getBorrowInfo();
+              getVaultInfo();
               setIsLoaded(true);
               toast.success("Interest Paid Successfully 🥳🎉🎊!");
             }),
@@ -149,15 +69,12 @@ function ETHBoard() {
     );
   };
   const handlePayInterest = () => {
-    GUSDContract?.allowance(
-      address,
-      "0x802304d9715F2E49878d151cf51b0A6e3B04f5c3"
-    )
+    AmerGContract?.allowance(address, ETHVault_Address)
       .then((responce) => {
         if (BigInt(parseInt(responce._hex)) < BigInt(totalInterest)) {
           toast.promise(
-            GUSDContract?.approve(
-              Exchange_Address,
+            AmerGContract?.approve(
+              ETHVault_Address,
               BigInt(totalInterest + 10000000000000000)
             )
               .then((tx) => {
@@ -185,16 +102,16 @@ function ETHBoard() {
       })
       .catch((err) => console.log("Find total Allowance Error:", err));
   };
-  // Refinance =============================================>>>
+  // ============================================================ [ReFinance]
   const handleRefinance = () => {
     toast.promise(
-      ExchangeContract?.refinance(selectedTxId, refinancePercentage)
+      VaultContract?.refinance(selectedVault, refinancePercentage)
         .then((tx) => {
           setIsLoaded(false);
           toast.promise(
             tx.wait().then((responce) => {
               console.log("Refinance Responce:", responce);
-              getBorrowInfo();
+              getVaultInfo();
               setIsLoaded(true);
               toast.success("Refinance Successfully 🥳🎉🎊!");
             }),
@@ -207,6 +124,7 @@ function ETHBoard() {
         .catch((error) => {
           console.log("Borrow Error:", error);
           toast.error(error?.error?.data?.message);
+          toast.error(error?.error?.message);
         }),
       {
         pending: "Waiting for Refinance Tx. to Accept!",
@@ -214,16 +132,16 @@ function ETHBoard() {
       }
     );
   };
-  // Reimburse =============================================>>>
+  // Reimburse ================================================== [ReImburse]
   const reimburse = () => {
     toast.promise(
-      ExchangeContract?.reimburse(selectedTxId, BigInt(reimburseAmount * 1e18))
+      VaultContract?.reimburse(selectedVault, BigInt(reimburseAmount * 1e18))
         .then((tx) => {
           setIsLoaded(false);
           toast.promise(
             tx.wait().then((responce) => {
               console.log("Reimburse Responce:", responce);
-              getBorrowInfo();
+              getVaultInfo();
               setIsLoaded(true);
               toast.success("Reimburse Successfully 🥳🎉🎊!");
             }),
@@ -244,16 +162,13 @@ function ETHBoard() {
     );
   };
   const handleReimburse = () => {
-    GUSDContract?.allowance(
-      address,
-      "0x802304d9715F2E49878d151cf51b0A6e3B04f5c3"
-    )
+    AmerGContract?.allowance(address, ETHVault_Address)
       .then((responce) => {
         if (BigInt(parseInt(responce._hex)) < BigInt(reimburseAmount * 1e18)) {
           toast.promise(
-            GUSDContract?.approve(
-              Exchange_Address,
-              BigInt(parseInt(borrowInfo[0], 10))
+            AmerGContract?.approve(
+              ETHVault_Address,
+              BigInt(parseInt(vaultInfo[0], 10))
             )
               .then((tx) => {
                 toast.promise(
@@ -280,258 +195,115 @@ function ETHBoard() {
       })
       .catch((err) => console.log("Find total Allowance Error:", err));
   };
-  // ReturnCollateral ======================================>>>
-  const handleReturnCollateral = () => {
+  // Collateral ================================================= [Collateral]
+  const handleDepositToVault = () => {
     toast.promise(
-      ExchangeContract?.returnCollateral(returnCollateralTxId)
+      VaultContract?.depositToVault(
+        selectedVault,
+        BigInt(
+          (ethExchangeRate * addEthAmount * 1e18) /
+            ((parseInt(vaultInfo[2], 10) + 1) / 100)
+        ),
+        {
+          value: ethers.utils.parseEther(addEthAmount.toString()),
+        }
+      )
         .then((tx) => {
           setIsLoaded(false);
           toast.promise(
-            tx.wait().then((responce) => {
-              console.log("Final Responce:", responce);
-              getBorrowInfo();
-              setIsLoaded(true);
-              toast.success("Return Collateral Successfully 🥳🎉🎊!");
+            tx.wait().then(async (responce) => {
+              getInterestRateInfo().then(() => setIsLoaded(true));
+              // setIsLoaded(true);
+              console.log("Final Borrow Responce:", responce);
+              toast.success("Borrow Successfully 🥳🎉🎊!");
             }),
             {
-              pending: "Return Collateral in Process...",
+              pending: "Please wait borrow in process!",
               error: "Transction Rejected 😏💔",
             }
           );
         })
         .catch((error) => {
           console.log("Borrow Error:", error);
+          toast.error(error?.message);
           toast.error(error?.error?.data?.message);
         }),
       {
-        pending: "Waiting for Tx. to Accept!",
+        pending: "Waiting for Borrow Tx. to Accept!",
         error: "Transction Rejected 😏💔",
       }
     );
   };
-  // Set Cold Wallet =======================================>>>
-  const handleSetColdWallet = () => {
-    toast.promise(
-      ExchangeContract?.setColdWallet(coldWalletAddress)
-        .then((tx) => {
-          setIsLoaded(false);
-          toast.promise(
-            tx.wait().then((responce) => {
-              console.log("Final Responce:", responce);
-              getBorrowInfo();
-              setIsLoaded(true);
-              toast.success("Cold Wallet Set Successfully 🥳🎉🎊!");
-            }),
-            {
-              pending: "Setting Cold Wallet in Process...",
-              error: "Transction Rejected 😏💔",
-            }
-          );
-        })
-        .catch((error) => {
-          console.log("Borrow Error:", error);
-          toast.error(error?.error?.data?.message);
-        }),
-      {
-        pending: "Waiting for Tx. to Accept!",
-        error: "Transction Rejected 😏💔",
-      }
-    );
+  // _________________________________ [Get All Vaults of User]
+  const getAllVaults = () => {
+    VaultContract.vaultsOf(address)
+      .then((vaultIds) => {
+        console.log("Vaults:", vaultIds);
+        setUserVaults(vaultIds);
+        setSelectedVault(parseInt(vaultIds, 10));
+        setIsLoaded(true);
+      })
+      .catch((error) => {
+        console.log("Error:", error);
+      });
   };
-  // Set Refinance Fee =====================================>>>
-  const handleSetRefinanceFee = () => {
-    toast.promise(
-      ExchangeContract?.setRefinanceFee(refinanceFee)
-        .then((tx) => {
-          setIsLoaded(false);
-          toast.promise(
-            tx.wait().then((responce) => {
-              console.log("Final Responce:", responce);
-              getBorrowInfo();
-              setIsLoaded(true);
-              toast.success("Refinance Fee Set Successfully 🥳🎉🎊!");
-            }),
-            {
-              pending: "Setting Refinance Fee in Process...",
-              error: "Transction Rejected 😏💔",
-            }
-          );
-        })
-        .catch((error) => {
-          console.log("Borrow Error:", error);
-          toast.error(error?.error?.data?.message);
-        }),
-      {
-        pending: "Waiting for Tx. to Accept!",
-        error: "Transction Rejected 😏💔",
-      }
-    );
+  // _________________________________ [Get Interest Rate   Info]
+  const getInterestRateInfo = async () => {
+    const i0 = await VaultContract.interestRates(0);
+    const i1 = await VaultContract.interestRates(1);
+    const i2 = await VaultContract.interestRates(2);
+    const i3 = await VaultContract.interestRates(3);
+    const i4 = await VaultContract.interestRates(4);
+    const i5 = await VaultContract.interestRates(5);
+
+    setInterestRateInfo([
+      parseInt(i0._hex, 16),
+      parseInt(i1._hex, 16),
+      parseInt(i2._hex, 16),
+      parseInt(i3._hex, 16),
+      parseInt(i4._hex, 16),
+      parseInt(i5._hex, 16),
+    ]);
   };
-  // Set Interest Rates =====================================>>>
-  const handleSetInterestRates = () => {
-    const interestRatesArray = interestRates.split(",").map((element) => {
-      return Number(element) * 100;
-    });
-    console.log("Interest rates", interestRatesArray);
-    toast.promise(
-      ExchangeContract?.setInterestRates(interestRatesArray)
-        .then((tx) => {
-          setIsLoaded(false);
-          toast.promise(
-            tx.wait().then((responce) => {
-              console.log("Final Responce:", responce);
-              getBorrowInfo();
-              setIsLoaded(true);
-              toast.success("Refinance Fee Set Successfully 🥳🎉🎊!");
-            }),
-            {
-              pending: "Setting Refinance Fee in Process...",
-              error: "Transction Rejected 😏💔",
-            }
-          );
-        })
-        .catch((error) => {
-          console.log("Borrow Error:", error);
-          toast.error(error?.error?.data?.message);
-        }),
-      {
-        pending: "Waiting for Tx. to Accept!",
-        error: "Transction Rejected 😏💔",
-      }
-    );
-  };
-  // Set Price Feeds =====================================>>>
-  const handleSetPriceFeeds = () => {
-    toast.promise(
-      ExchangeContract?.setPriceFeeds(btcFeedAddress, ethFeedAddress)
-        .then((tx) => {
-          setIsLoaded(false);
-          toast.promise(
-            tx.wait().then((responce) => {
-              console.log("Final Responce:", responce);
-              getBorrowInfo();
-              setIsLoaded(true);
-              toast.success("Price Feeds Set Successfully 🥳🎉🎊!");
-            }),
-            {
-              pending: "Setting Price Feeds in Process...",
-              error: "Transction Rejected 😏💔",
-            }
-          );
-        })
-        .catch((error) => {
-          console.log("Error:", error);
-          toast.error(error?.error?.data?.message);
-        }),
-      {
-        pending: "Waiting for Tx. to Accept!",
-        error: "Transction Rejected 😏💔",
-      }
-    );
-  };
-  // Widthdraw ===============================================================>>>
-  // Widthdraw BTC =========================================>>>
-  const handleWithdrawBtc = () => {
-    toast.promise(
-      ExchangeContract?.withdrawBtc(BigInt(withdrawBtcAmount * 1e18))
-        .then((tx) => {
-          setIsLoaded(false);
-          toast.promise(
-            tx.wait().then((responce) => {
-              console.log("Final Responce:", responce);
-              getBorrowInfo();
-              setIsLoaded(true);
-              toast.success("Withdraw BTC Successfully 🥳🎉🎊!");
-            }),
-            {
-              pending: "Withdraw BTC in Process...",
-              error: "Transction Rejected 😏💔",
-            }
-          );
-        })
-        .catch((error) => {
-          console.log("Borrow Error:", error);
-          toast.error(error?.error?.data?.message);
-        }),
-      {
-        pending: "Waiting for Tx. to Accept!",
-        error: "Transction Rejected 😏💔",
-      }
-    );
-  };
-  // Widthdraw BTC =========================================>>>
-  const handleWithdrawEth = () => {
-    toast.promise(
-      ExchangeContract?.withdrawEth(BigInt(withdrawEthAmount * 1e18))
-        .then((tx) => {
-          setIsLoaded(false);
-          toast.promise(
-            tx.wait().then((responce) => {
-              console.log("Final Responce:", responce);
-              getBorrowInfo();
-              setIsLoaded(true);
-              toast.success("Withdraw ETH Successfully 🥳🎉🎊!");
-            }),
-            {
-              pending: "Withdraw ETH in Process...",
-              error: "Transction Rejected 😏💔",
-            }
-          );
-        })
-        .catch((error) => {
-          console.log("Borrow Error:", error);
-          toast.error(error?.error?.data?.message);
-        }),
-      {
-        pending: "Waiting for Tx. to Accept!",
-        error: "Transction Rejected 😏💔",
-      }
-    );
-  };
-  // Widthdraw Tokens(AmerG) ================================>>>
-  const handleWithdrawTokens = () => {
-    toast.promise(
-      ExchangeContract?.withdrawTokens(BigInt(withdrawTokensAmount * 1e18))
-        .then((tx) => {
-          setIsLoaded(false);
-          toast.promise(
-            tx.wait().then((responce) => {
-              console.log("Final Responce:", responce);
-              getBorrowInfo();
-              setIsLoaded(true);
-              toast.success("Withdraw Tokens Successfully 🥳🎉🎊!");
-            }),
-            {
-              pending: "Withdraw Tokens in Process...",
-              error: "Transction Rejected 😏💔",
-            }
-          );
-        })
-        .catch((error) => {
-          console.log("Borrow Error:", error);
-          toast.error(error?.error?.data?.message);
-        }),
-      {
-        pending: "Waiting for Tx. to Accept!",
-        error: "Transction Rejected 😏💔",
-      }
-    );
+  // _________________________________ [Get Selected Vaults Info]
+  const getVaultInfo = () => {
+    VaultContract.vaults(selectedVault)
+      .then((info) => {
+        setVaultInfo(info);
+      })
+      .catch((error) => {
+        console.log("getBorrowInfo Error:", error);
+      });
+
+    VaultContract.totalInterest(selectedVault)
+      .then((info) => {
+        setTotalInterest(parseInt(info._hex, 16));
+      })
+      .catch((error) => {
+        console.log("getBorrowInfo Error:", error);
+      });
+    // _________ [Get Eth Exchange Rate]
+    VaultContract.ethExchangeRate()
+      .then((info) => {
+        setEthExchangeRate(parseInt(info._hex, 16));
+      })
+      .catch((error) => {
+        console.log("getBorrowInfo Error:", error);
+      });
+
+    getInterestRateInfo();
   };
 
-  // useEffect =============================================>>>
+  // useEffect ______________________
   React.useEffect(() => {
-    if (signer) getTxIds();
+    if (signer) getAllVaults();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [signer, address, isBTCSelected]);
+  }, [signer, address]);
 
   React.useEffect(() => {
-    if (signer && selectedTxId) getBorrowInfo();
+    if (signer) getVaultInfo();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedTxId, isBTCSelected]);
-
-  function classNames(...classes) {
-    return classes.filter(Boolean).join(" ");
-  }
+  }, [selectedVault]);
 
   return (
     <React.Fragment>
@@ -540,40 +312,16 @@ function ETHBoard() {
         <h5 className="text-center text-3xl font-medium mb-8">DASHBOARD</h5>
         <div className="grid grid-cols-1 md:grid-cols-2 mx-3 md:mx-0 gap-8">
           {/* Column 1 */}
-          <div className="bg-gradient-to-r from-grad-one via-grad-two to-grad-three rounded-xl p-7 shadow-xl">
+          <div className="bg-gradient-to-r from-[#6CEAE6] via-[#6CEAE6] to-[#6CEAE6] rounded-xl p-7 shadow-xl">
             <div className="flex justify-between items-center mb-3">
-              <h6 className="text-xl font-medium">
-                Pay your {isBTCSelected ? "BTC" : "ETH"} Interest
-              </h6>
+              <h6 className="text-xl font-medium">Pay your ETH Interest</h6>
               <div className="w-24 ml-4">
                 {isLoaded ? (
                   <Tab.Group>
                     <Tab.List className="flex space-x-1 rounded-full p-1 bg-secondary-light">
                       <Tab
                         key="BTC"
-                        onClick={() => setIsBTCSelected(true)}
-                        className={({ selected }) =>
-                          classNames(
-                            "w-full rounded-full py-1 text-xs font-medium leading-5 text-primary",
-                            selected
-                              ? "bg-white shadow outline-none "
-                              : "text-gray-600 hover:bg-white/[0.3] hover:text-gray-800"
-                          )
-                        }
-                      >
-                        BTC
-                      </Tab>
-                      <Tab
-                        key="ETH"
-                        onClick={() => setIsBTCSelected(false)}
-                        className={({ selected }) =>
-                          classNames(
-                            "w-full rounded-full py-1 text-xs font-medium leading-5 text-primary",
-                            selected
-                              ? "bg-white shadow outline-none"
-                              : "text-gray-600 hover:bg-white/[0.3] hover:text-gray-800"
-                          )
-                        }
+                        className="w-full rounded-full py-1 text-xs font-medium leading-5 text-primary bg-white shadow outline-none "
                       >
                         ETH
                       </Tab>
@@ -588,16 +336,12 @@ function ETHBoard() {
             </div>
             <div className="flex justify-between items-center mb-3 w-full">
               <p className="text-gray-600 text-sm my-auto py-2 w-9/12">
-                Please Select One of the Transaction Id to Pay Its Interest.
+                Please Select One of the Vault Id to Pay Its Interest.
               </p>
-              <Listbox
-                value={selectedTxId}
-                onChange={setSelectedTxId}
-                // className="w-2/12"
-              >
+              <Listbox value={selectedVault} onChange={setSelectedVault}>
                 <div className="relative border border-primary rounded-lg w-3/12">
                   <Listbox.Button className="relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm">
-                    <span className="block truncate">{selectedTxId}</span>
+                    <span className="block truncate">{selectedVault}</span>
                     <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
                       <BiChevronsDown
                         className="h-5 w-5 text-gray-400"
@@ -612,9 +356,9 @@ function ETHBoard() {
                     leaveTo="opacity-0"
                   >
                     <Listbox.Options className="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-                      {BTCTxIds.map((txId, idIndex) => (
+                      {userVaults.map((vaultsId, index) => (
                         <Listbox.Option
-                          key={idIndex}
+                          key={index}
                           className={({ active }) =>
                             `relative cursor-default select-none py-2 pl-10 pr-4 ${
                               active
@@ -622,18 +366,18 @@ function ETHBoard() {
                                 : "text-gray-900"
                             }`
                           }
-                          value={parseInt(txId, 10)}
+                          value={parseInt(vaultsId, 10)}
                         >
-                          {({ selectedTxId }) => (
+                          {({ selectedVault }) => (
                             <>
                               <span
                                 className={`block truncate ${
-                                  selectedTxId ? "font-medium" : "font-normal"
+                                  selectedVault ? "font-medium" : "font-normal"
                                 }`}
                               >
-                                {parseInt(txId, 10)}
+                                {parseInt(vaultsId, 10)}
                               </span>
-                              {selectedTxId ? (
+                              {selectedVault ? (
                                 <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-amber-600">
                                   <BiCheck
                                     className="h-5 w-5"
@@ -656,22 +400,23 @@ function ETHBoard() {
               <span className="mx-2">
                 <BsArrowRight />
               </span>
-              {isLoaded ? parseInt(borrowInfo[0], 10) / 1e18 : "Loading..."}
+              {isLoaded ? parseInt(vaultInfo[0], 10) / 1e18 : "Loading..."}
             </p>
             <p className="flex items-center leading-8 font-medium cursor-pointer hover:gap-1">
               Borrowed From
               <span className="mx-2">
                 <BsArrowRight />
               </span>
-              {isLoaded ? parseInt(borrowInfo[1], 10) / 1e18 : "Loading..."}
-              {borrowInfo[6] ? " BTC" : " ETH"}
+              {isLoaded
+                ? parseInt(vaultInfo[1], 10) / 1e18 + " ETH"
+                : "Loading..."}
             </p>
             <p className="flex items-center leading-8 font-medium cursor-pointer hover:gap-1">
               Collateral Percentage
               <span className="mx-2">
                 <BsArrowRight />
               </span>
-              {isLoaded ? parseInt(borrowInfo[2], 10) + "%" : "Loading..."}
+              {isLoaded ? parseInt(vaultInfo[2], 10) + "%" : "Loading..."}
             </p>
             <p className="flex items-center leading-8 font-medium cursor-pointer hover:gap-1">
               Last Paid On
@@ -679,10 +424,10 @@ function ETHBoard() {
                 <BsArrowRight />
               </span>
               {isLoaded
-                ? new Date(parseInt(borrowInfo[3], 10) * 1000).toDateString() +
+                ? new Date(parseInt(vaultInfo[3], 10) * 1000).toDateString() +
                   " - " +
                   new Date(
-                    parseInt(borrowInfo[3], 10) * 1000
+                    parseInt(vaultInfo[3], 10) * 1000
                   ).toLocaleTimeString()
                 : "Loading..."}
             </p>
@@ -693,29 +438,30 @@ function ETHBoard() {
               </span>
               {/* {isLoaded ? parseInt(borrowInfo[4], 10) : "Loading..."} */}
               {isLoaded
-                ? parseInt(borrowInfo[2], 10) >= 401 &&
-                  parseInt(borrowInfo[2], 10) <= 500
+                ? parseInt(vaultInfo[2], 10) >= 401 &&
+                  parseInt(vaultInfo[2], 10) <= 500
                   ? parseInt(interestRateInfo[0], 10) / 100 + "%"
-                  : parseInt(borrowInfo[2], 10) >= 301 &&
-                    parseInt(borrowInfo[2], 10) < 401
+                  : parseInt(vaultInfo[2], 10) >= 301 &&
+                    parseInt(vaultInfo[2], 10) < 401
                   ? parseInt(interestRateInfo[1], 10) / 100 + "%"
-                  : parseInt(borrowInfo[2], 10) >= 251 &&
-                    parseInt(borrowInfo[2], 10) <= 301
+                  : parseInt(vaultInfo[2], 10) >= 251 &&
+                    parseInt(vaultInfo[2], 10) <= 301
                   ? parseInt(interestRateInfo[2], 10) / 100 + "%"
-                  : parseInt(borrowInfo[2], 10) >= 201 &&
-                    parseInt(borrowInfo[2], 10) < 251
+                  : parseInt(vaultInfo[2], 10) >= 201 &&
+                    parseInt(vaultInfo[2], 10) < 251
                   ? parseInt(interestRateInfo[3], 10) / 100 + "%"
-                  : parseInt(borrowInfo[2], 10) >= 171 &&
-                    parseInt(borrowInfo[2], 10) <= 201
+                  : parseInt(vaultInfo[2], 10) >= 171 &&
+                    parseInt(vaultInfo[2], 10) <= 201
                   ? parseInt(interestRateInfo[4], 10) / 100 + "%"
-                  : parseInt(borrowInfo[2], 10) >= 120 &&
-                    parseInt(borrowInfo[2], 10) <= 171
+                  : parseInt(vaultInfo[2], 10) >= 120 &&
+                    parseInt(vaultInfo[2], 10) <= 171
                   ? parseInt(interestRateInfo[5], 10) / 100 + "%"
                   : "Invalid Collateral"
                 : "Loading..."}
             </p>
             <div className="flex flex-col md:flex-row items-center md:justify-between leading-8 mt-4 font-medium cursor-pointer hover:gap-1">
               <div>
+                <h3 className="text-xs ml-1 mb-0.5">Acumulated Interest</h3>
                 {isLoaded ? (
                   <input
                     value={totalInterest / 1e18}
@@ -725,13 +471,12 @@ function ETHBoard() {
                 ) : (
                   "Loading..."
                 )}
-
                 <span className="ml-3">AmerG</span>
               </div>
 
               <button
                 onClick={() => handlePayInterest()}
-                className="bg-gradient-to-r from-grad-three via-grad-two to-grad-one text-primary border border-primary hover:scale-95 rounded-lg px-4 py-1 mt-4 w-auto md:mt-0 outline-none shadow-xl"
+                className="bg-gradient-to-r from-[#6CEAE6] via-[#6CEAE6] to-[#6CEAE6] text-primary border border-primary hover:scale-95 rounded-lg px-4 py-1 mt-4 w-auto md:mt-0 outline-none shadow-xl"
               >
                 Pay Interest
               </button>
@@ -739,8 +484,55 @@ function ETHBoard() {
           </div>
           {/* Column 2 */}
           <div>
+            {/* Column 2.0 */}
+            <div className="bg-gradient-to-r from-[#6CEAE6] via-[#6CEAE6] to-[#6CEAE6] rounded-xl px-6 py-6 mb-8 shadow-xl">
+              {/* Collateral */}
+              <h6 className="text-xl font-medium">Collateral</h6>
+              <p className="text-gray-600 text-sm my-auto pb-2">
+                You can add more collateral into existing vault.
+              </p>
+
+              <div className="flex flex-col md:flex-row mb-4 w-full">
+                <div className="flex flex-col mr-4">
+                  <label className="text-xs text-gray-600 mb-1">Vault ID</label>
+                  <input
+                    value={selectedVault}
+                    disabled={true}
+                    className="bg-white rounded-lg border border-gray-300 px-4 py-1 outline-none w-20"
+                  />
+                </div>
+                <div className="flex flex-col w-full">
+                  <label className="text-xs text-gray-600 mb-1">
+                    You will get estimated:{" "}
+                    <span className="font-medium text-green-700">
+                      {" "}
+                      {parseFloat(
+                        (ethExchangeRate * addEthAmount) /
+                          (parseInt(vaultInfo[2], 10) / 100)
+                      ).toFixed(2)}{" "}
+                      AmerG
+                    </span>
+                  </label>
+                  <input
+                    placeholder="Ether Eth Value"
+                    value={addEthAmount}
+                    // disabled={true}
+                    onChange={(e) => {
+                      setAddEthAmount(e.target.value);
+                    }}
+                    className="bg-white rounded-lg border border-gray-300 px-4 py-1 outline-none w-auto"
+                  />
+                </div>
+                <button
+                  onClick={() => handleDepositToVault()}
+                  className="bg-gradient-to-r from-[#6CEAE6] via-[#6CEAE6] to-[#6CEAE6] text-primary border border-primary hover:scale-95 rounded-lg outline-none shadow-xl min-w-[6rem] py-1 px-2 mt-2 md:ml-4 md:mt-auto"
+                >
+                  Add
+                </button>
+              </div>
+            </div>
             {/* Column 2.1 */}
-            <div className="bg-gradient-to-r from-grad-three via-grad-two to-grad-one rounded-xl px-6 py-6 mb-8 shadow-xl">
+            <div className="bg-gradient-to-r from-[#6CEAE6] via-[#6CEAE6] to-[#6CEAE6] rounded-xl px-6 py-6 mb-8 shadow-xl">
               {/* Refinance */}
               <h6 className="text-xl font-medium">Refinance</h6>
               <p className="text-gray-600 text-sm my-auto pb-2">
@@ -748,9 +540,9 @@ function ETHBoard() {
               </p>
               <div className="flex flex-col md:flex-row mb-4 w-full">
                 <div className="flex flex-col mr-4">
-                  <label className="text-xs text-gray-600 mb-1">Tx ID</label>
+                  <label className="text-xs text-gray-600 mb-1">Vault ID</label>
                   <input
-                    value={selectedTxId}
+                    value={selectedVault}
                     disabled={true}
                     className="bg-white rounded-lg border border-gray-300 px-4 py-1 outline-none w-20"
                   />
@@ -771,14 +563,14 @@ function ETHBoard() {
                 </div>
                 <button
                   onClick={() => handleRefinance()}
-                  className="bg-gradient-to-r from-grad-one via-grad-two to-grad-three text-primary border border-primary hover:scale-95 rounded-lg outline-none shadow-xl py-1 px-2 mt-2 md:ml-4 md:mt-auto"
+                  className="bg-gradient-to-r from-[#6CEAE6] via-[#6CEAE6] to-[#6CEAE6] text-primary border border-primary hover:scale-95 rounded-lg outline-none shadow-xl min-w-[6rem] py-1 px-2 mt-2 md:ml-4 md:mt-auto"
                 >
                   Update
                 </button>
               </div>
             </div>
             {/* Column 2.2 */}
-            <div className="bg-gradient-to-r from-grad-three via-grad-two to-grad-one rounded-xl px-6 py-6 shadow-xl">
+            <div className="bg-gradient-to-r from-[#6CEAE6] via-[#6CEAE6] to-[#6CEAE6] rounded-xl px-6 py-6 shadow-xl">
               {/* Reimburse */}
               <h6 className="text-xl font-medium">Reimburse</h6>
               <p className="text-gray-600 text-sm my-auto pb-2">
@@ -786,19 +578,19 @@ function ETHBoard() {
               </p>
               <div className="flex flex-col md:flex-row mb-4 w-full">
                 <div className="flex flex-col mr-4">
-                  <label className="text-xs text-gray-600 mb-1">Tx ID</label>
+                  <label className="text-xs text-gray-600 mb-1">Vault ID</label>
                   <input
-                    value={selectedTxId}
+                    value={selectedVault}
                     disabled={true}
                     className="bg-white rounded-lg border border-gray-300 px-4 py-1 outline-none w-20"
                   />
                 </div>
                 <div className="flex flex-col w-full">
                   <label className="text-xs text-gray-600 mb-1">
-                    Ammout{" "}
+                    Amount{" "}
                     {isLoaded
                       ? "(" +
-                        parseInt(borrowInfo[0], 10) / 1e18 +
+                        parseInt(vaultInfo[0], 10) / 1e18 +
                         " AmerG Available)"
                       : "(Loading...)"}
                   </label>
@@ -811,7 +603,7 @@ function ETHBoard() {
                 </div>
                 <button
                   onClick={() => handleReimburse()}
-                  className="bg-gradient-to-r from-grad-one via-grad-two to-grad-three text-primary border border-primary hover:scale-95 rounded-lg outline-none shadow-xl py-1 px-2 mt-2 md:ml-4 md:mt-auto"
+                  className="bg-gradient-to-r from-[#6CEAE6] via-[#6CEAE6] to-[#6CEAE6] text-primary border border-primary hover:scale-95 rounded-lg outline-none shadow-xl min-w-[6rem] py-1 px-2 mt-2 md:ml-4 md:mt-auto"
                 >
                   Return
                 </button>
@@ -819,271 +611,6 @@ function ETHBoard() {
             </div>
           </div>
         </div>
-        {/* Only Owner */}
-        {isOwner ? (
-          <div>
-            <h5 className="text-center text-3xl font-medium mt-12 mb-8">
-              ONLY OWNER
-            </h5>
-            {/* Row 2 */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 bg-gradient-to-r from-grad-one via-grad-two to-grad-three rounded-xl p-7 mx-3 md:mx-0  shadow-xl">
-              {/* returnCollateral */}
-              <div className="px-6 py-6 border border-gray-400 rounded-xl">
-                <h6 className="text-xl font-medium">Return Collateral</h6>
-                <p className="text-gray-600 text-sm my-auto pb-2">
-                  You can return assets back to user for any reason.
-                </p>
-                <div className="flex flex-col md:flex-row mb-4 w-full">
-                  <div className="flex flex-col w-full">
-                    <label className="text-xs text-gray-600 mb-1">Tx ID</label>
-                    <input
-                      placeholder="Please enter Tx Id to return collateral"
-                      value={returnCollateralTxId}
-                      // disabled={true}
-                      onChange={(e) => {
-                        setReturnCollateralTxId(e.target.value);
-                      }}
-                      className="bg-white rounded-lg border border-gray-300 px-4 py-1 outline-none w-auto"
-                    />
-                  </div>
-                  <button
-                    onClick={() => handleReturnCollateral()}
-                    className="bg-gradient-to-r from-grad-one via-grad-two to-grad-three text-primary border border-primary hover:scale-95 rounded-lg outline-none shadow-xl py-1 px-2 mt-2 md:ml-4 md:mt-auto"
-                  >
-                    Return
-                  </button>
-                </div>
-              </div>
-              {/* setColdWallet */}
-              <div className="px-6 py-6 border border-gray-400 rounded-xl">
-                <h6 className="text-xl font-medium">Set Cold Wallet</h6>
-                <p className="text-gray-600 text-sm my-auto pb-2">
-                  You can new cold wallet address here.
-                </p>
-                <div className="flex flex-col md:flex-row mb-4 w-full">
-                  <div className="flex flex-col w-full">
-                    <label className="text-xs text-gray-600 mb-1">
-                      Wallet Address
-                    </label>
-                    <input
-                      placeholder="0x012..."
-                      value={coldWalletAddress}
-                      onChange={(e) => {
-                        setColdWalletAddress(e.target.value);
-                      }}
-                      className="bg-white rounded-lg border border-gray-300 px-4 py-1 outline-none w-auto"
-                    />
-                  </div>
-                  <button
-                    onClick={() => handleSetColdWallet()}
-                    className="bg-gradient-to-r from-grad-one via-grad-two to-grad-three text-primary border border-primary hover:scale-95 rounded-lg outline-none shadow-xl py-1 px-2 mt-2 md:ml-4 md:mt-auto"
-                  >
-                    Set_Wallet
-                  </button>
-                </div>
-              </div>
-              {/* setInterestRates - incomplete */}
-              <div className="px-6 py-6 border border-gray-400 rounded-xl">
-                <h6 className="text-xl font-medium">Set Interest Rate</h6>
-                <p className="text-gray-600 text-sm my-auto pb-2">
-                  You can set new interest rates here (must be 6 comma
-                  separated).
-                </p>
-                <div className="flex flex-col md:flex-row mb-4 w-full">
-                  <div className="flex flex-col w-full">
-                    <label className="text-xs text-gray-600 mb-1">
-                      Rates 0.1, 1.5, 3, 4, 6, 8 etc
-                    </label>
-                    <input
-                      placeholder="0.5,2,3,4,5,7"
-                      value={interestRates}
-                      onChange={(e) => {
-                        setInterestRates(e.target.value);
-                      }}
-                      className="bg-white rounded-lg border border-gray-300 px-4 py-1 outline-none w-auto"
-                    />
-                  </div>
-                  <button
-                    onClick={() => handleSetInterestRates()}
-                    className="bg-gradient-to-r from-grad-one via-grad-two to-grad-three text-primary border border-primary hover:scale-95 rounded-lg outline-none shadow-xl py-1 px-2 mt-2 md:ml-4 md:mt-auto"
-                  >
-                    Set_Rate
-                  </button>
-                </div>
-                <h6 className="text-xl font-medium mt-4 mb-1">
-                  Current Interest Rates
-                </h6>
-                <div className="flex items-center">
-                  Annual Interest
-                  <span className="mx-2">
-                    <BsArrowRight />
-                  </span>
-                  {interestRateInfo.map((rate, key) => {
-                    return (
-                      <span key={"rate" + key}>
-                        {parseInt(rate._hex, 16) / 100 + "%"},&nbsp;
-                      </span>
-                    );
-                  })}
-                </div>
-              </div>
-              {/* setPriceFeeds - incomplete */}
-              <div className="px-6 py-6 border border-gray-400 rounded-xl">
-                <h6 className="text-xl font-medium">Set Price Feeds</h6>
-                <p className="text-gray-600 text-sm my-auto pb-2">
-                  You can set new interest rates here (must be 6 comma
-                  separated).
-                </p>
-                <div className="flex flex-col md:flex-row mb-4 w-full">
-                  <div className="flex flex-col w-full">
-                    <label className="text-xs text-gray-600 mb-1">
-                      BTC Feed
-                    </label>
-                    <input
-                      placeholder="Enter BTC Feed Address"
-                      value={btcFeedAddress}
-                      onChange={(e) => {
-                        setBtcFeedAddress(e.target.value);
-                      }}
-                      className="bg-white rounded-lg border border-gray-300 px-4 py-1 outline-none w-auto mb-4"
-                    />
-                    <label className="text-xs text-gray-600 mb-1">
-                      ETH Feed
-                    </label>
-                    <input
-                      placeholder="Enter ETH Feed Address"
-                      value={ethFeedAddress}
-                      onChange={(e) => {
-                        setEthFeedAddress(e.target.value);
-                      }}
-                      className="bg-white rounded-lg border border-gray-300 px-4 py-1 outline-none w-auto"
-                    />
-                  </div>
-                  <button
-                    onClick={() => handleSetPriceFeeds()}
-                    className="bg-gradient-to-r from-grad-one via-grad-two to-grad-three text-primary border border-primary hover:scale-95 rounded-lg outline-none shadow-xl py-1 px-2 mt-2 md:ml-4 md:mt-auto"
-                  >
-                    Set_Price
-                  </button>
-                </div>
-              </div>
-              {/* setRefinanceFee */}
-              <div className="px-6 py-6 border border-gray-400 rounded-xl">
-                <h6 className="text-xl font-medium">Set Refinance Fee</h6>
-                <p className="text-gray-600 text-sm my-auto pb-2">
-                  You can set refinance fee here.
-                </p>
-                <div className="flex flex-col md:flex-row mb-4 w-full">
-                  <div className="flex flex-col w-full">
-                    <label className="text-xs text-gray-600 mb-1">
-                      New Fee
-                    </label>
-                    <input
-                      placeholder="0x012..."
-                      value={refinanceFee}
-                      onChange={(e) => {
-                        setRefinanceFee(e.target.value);
-                      }}
-                      className="bg-white rounded-lg border border-gray-300 px-4 py-1 outline-none w-auto"
-                    />
-                  </div>
-                  <button
-                    onClick={() => handleSetRefinanceFee()}
-                    className="bg-gradient-to-r from-grad-one via-grad-two to-grad-three text-primary border border-primary hover:scale-95 rounded-lg outline-none shadow-xl py-1 px-2 mt-2 md:ml-4 md:mt-auto"
-                  >
-                    Set_Fee
-                  </button>
-                </div>
-              </div>
-            </div>
-            <h5 className="text-center text-3xl font-medium mt-12 mb-8">
-              Withdraw Functions
-            </h5>
-            {/* Row 3 */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 bg-gradient-to-r from-grad-one via-grad-two to-grad-three rounded-xl p-7 mx-3 md:mx-0  shadow-xl">
-              {/* withdrawBtc */}
-              <div className="px-6 py-6 border border-gray-400 rounded-xl">
-                <h6 className="text-xl font-medium">Withdraw BTC</h6>
-                <p className="text-gray-600 text-sm my-auto pb-2">
-                  You can widthdraw BTC form here.
-                </p>
-                <div className="flex flex-col md:flex-row mb-4 w-full">
-                  <div className="flex flex-col w-full">
-                    <label className="text-xs text-gray-600 mb-1">Amount</label>
-                    <input
-                      placeholder="Enter BTC Amount"
-                      value={withdrawBtcAmount}
-                      onChange={(e) => {
-                        setWithdrawBtcAmount(e.target.value);
-                      }}
-                      className="bg-white rounded-lg border border-gray-300 px-4 py-1 outline-none w-auto"
-                    />
-                  </div>
-                  <button
-                    onClick={() => handleWithdrawBtc()}
-                    className="bg-gradient-to-r from-grad-one via-grad-two to-grad-three text-primary border border-primary hover:scale-95 rounded-lg outline-none shadow-xl py-1 px-2 mt-2 md:ml-4 md:mt-auto"
-                  >
-                    Widthdraw
-                  </button>
-                </div>
-              </div>
-              {/* withdrawEth */}
-              <div className="px-6 py-6 border border-gray-400 rounded-xl">
-                <h6 className="text-xl font-medium">Withdraw ETH</h6>
-                <p className="text-gray-600 text-sm my-auto pb-2">
-                  You can widthdraw ETH form here.
-                </p>
-                <div className="flex flex-col md:flex-row mb-4 w-full">
-                  <div className="flex flex-col w-full">
-                    <label className="text-xs text-gray-600 mb-1">Amount</label>
-                    <input
-                      placeholder="Enter ETH Amount"
-                      value={withdrawEthAmount}
-                      onChange={(e) => {
-                        setWithdrawEthAmount(e.target.value);
-                      }}
-                      className="bg-white rounded-lg border border-gray-300 px-4 py-1 outline-none w-auto"
-                    />
-                  </div>
-                  <button
-                    onClick={() => handleWithdrawEth()}
-                    className="bg-gradient-to-r from-grad-one via-grad-two to-grad-three text-primary border border-primary hover:scale-95 rounded-lg outline-none shadow-xl py-1 px-2 mt-2 md:ml-4 md:mt-auto"
-                  >
-                    Widthdraw
-                  </button>
-                </div>
-              </div>
-              {/* withdrawTokens */}
-              <div className="px-6 py-6 border border-gray-400 rounded-xl">
-                <h6 className="text-xl font-medium">Withdraw Tokens (AmerG)</h6>
-                <p className="text-gray-600 text-sm my-auto pb-2">
-                  You can widthdraw Tokens(AmerG) form here.
-                </p>
-                <div className="flex flex-col md:flex-row mb-4 w-full">
-                  <div className="flex flex-col w-full">
-                    <label className="text-xs text-gray-600 mb-1">Amount</label>
-                    <input
-                      placeholder="Enter AmerG Amount"
-                      value={withdrawTokensAmount}
-                      onChange={(e) => {
-                        setWithdrawTokensAmount(e.target.value);
-                      }}
-                      className="bg-white rounded-lg border border-gray-300 px-4 py-1 outline-none w-auto"
-                    />
-                  </div>
-                  <button
-                    onClick={() => handleWithdrawTokens()}
-                    className="bg-gradient-to-r from-grad-one via-grad-two to-grad-three text-primary border border-primary hover:scale-95 rounded-lg outline-none shadow-xl py-1 px-2 mt-2 md:ml-4 md:mt-auto"
-                  >
-                    Widthdraw
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <></>
-        )}
       </div>
     </React.Fragment>
   );
