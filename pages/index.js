@@ -3,15 +3,11 @@ import React from "react";
 import { ethers } from "ethers";
 import { useSigner, useAccount } from "wagmi";
 import {
-  GUSD_Address,
-  TESTBTC_Address,
-  Exchange_Address,
   AmerG_Address,
   TWBTC_Address,
   ETHVault_Address,
   BTCVault_Address,
 } from "./../contracts/Addresses";
-import { Token_Abi, StableCoin_Abi, Exchange_Abi } from "../contracts/Abis";
 // V2 ------------------------------
 import {
   AmerG_ABI,
@@ -48,18 +44,6 @@ export default function Home() {
     BTCRate: 0,
   });
 
-  let GUSDContract,
-    TESTBTCContract,
-    ExchangeContract = "";
-  if (signer) {
-    GUSDContract = new ethers.Contract(GUSD_Address, StableCoin_Abi, signer);
-    TESTBTCContract = new ethers.Contract(TESTBTC_Address, Token_Abi, signer);
-    ExchangeContract = new ethers.Contract(
-      Exchange_Address,
-      Exchange_Abi,
-      signer
-    );
-  }
   // V2 ----------------------------------------------------------------
   let AmerGContract,
     TWBTCContract,
@@ -83,23 +67,25 @@ export default function Home() {
   const getTokenRate = async (cat_name, cat_index) => {
     if (cat_name !== "") {
       if (cat_name === "Borrow" && cat_index === 0) {
-        await ExchangeContract?.getEthRate()
+        await ETHVaultContract?.ethExchangeRate()
           .then((responce) => {
             setCategoryInfo((categoryInfo) => ({
               ...categoryInfo,
               ETHRate: parseInt(responce?._hex),
             }));
+            // console.log("ETGGGG: ", parseInt(responce?._hex));
           })
           .catch((error) => {
             toast.error("Borrow BTC Rate Error :", error?.error?.message);
           });
       } else if (cat_name === "Borrow" && cat_index === 1) {
-        await ExchangeContract?.getBtcRate()
+        await BTCVaultContract?.btcExchangeRate()
           .then((responce) => {
             setCategoryInfo((categoryInfo) => ({
               ...categoryInfo,
               BTCRate: parseInt(responce?._hex),
             }));
+            // console.log("ETGGGG: ", parseInt(responce?._hex));
           })
           .catch((error) => {
             toast.error("Borrow BTC Rate Error :", error?.error?.message);
@@ -108,13 +94,22 @@ export default function Home() {
     }
   };
   const getInterestRates = async () => {
-    await ExchangeContract?.getInterestRates()
-      .then((responce) => {
-        setInterestRates(responce);
-      })
-      .catch((error) => {
-        toast.error("Borrow BTC Rate Error :", error?.error?.message);
-      });
+    // ________________________________________________ [Get Interest Rate from ETH]
+    const i0 = await ETHVaultContract.interestRates(0);
+    const i1 = await ETHVaultContract.interestRates(1);
+    const i2 = await ETHVaultContract.interestRates(2);
+    const i3 = await ETHVaultContract.interestRates(3);
+    const i4 = await ETHVaultContract.interestRates(4);
+    const i5 = await ETHVaultContract.interestRates(5);
+
+    setInterestRates([
+      parseInt(i0._hex, 16) / 100,
+      parseInt(i1._hex, 16) / 100,
+      parseInt(i2._hex, 16) / 100,
+      parseInt(i3._hex, 16) / 100,
+      parseInt(i4._hex, 16) / 100,
+      parseInt(i5._hex, 16) / 100,
+    ]);
   };
   // Borrow from ETH ____________________________________________________________________________|
   const handleBorrowFromETH = () => {
@@ -132,74 +127,7 @@ export default function Home() {
       collateral
     );
   };
-  // Borrow from BTC ______________________________________________>>>
-  // const borrowFromBTC = () => {
-  //   toast.promise(
-  //     ExchangeContract?.borrowTokensForBtc(
-  //       BigInt(borrowInfo?.tokens * 1e18),
-  //       BigInt(
-  //         (categoryInfo?.BTCRate * borrowInfo?.tokens * 1e18) /
-  //           ((collateral + 1) / 100)
-  //       )
-  //     )
-  //       .then((tx) =>
-  //         toast.promise(
-  //           tx.wait().then((responce) => {
-  //             console.log("Final Responce:", responce);
-  //             toast.success("Borrow Successfully 🥳🎉🎊!");
-  //           }),
-  //           {
-  //             pending: "Please wait borrow in process!",
-  //             error: "Transction Rejected 😏💔",
-  //           }
-  //         )
-  //       )
-  //       .catch((error) => {
-  //         console.log("Borrow Error:", error);
-  //         toast.error(error?.error?.data?.message);
-  //       }),
-  //     {
-  //       pending: "Step 2 of 2: Waiting for Borrow Tx. to Accept!",
-  //       error: "Transction Rejected 😏💔",
-  //     }
-  //   );
-  // };
-  // const handleBorrowFromBTC = () => {
-  //   TESTBTCContract?.allowance(address, Exchange_Address)
-  //     .then((responce) => {
-  //       if (
-  //         BigInt(parseInt(responce._hex)) < BigInt(borrowInfo?.tokens * 1e18)
-  //       ) {
-  //         toast.promise(
-  //           TESTBTCContract?.approve(
-  //             Exchange_Address,
-  //             BigInt(borrowInfo?.tokens * 1e18)
-  //           )
-  //             .then((tx) => {
-  //               toast.promise(
-  //                 tx.wait().then((responce) => {
-  //                   borrowFromBTC();
-  //                 }),
-  //                 {
-  //                   pending: "Please wait allowance in process!",
-  //                   error: "Something wrong with Allowance 😏💔",
-  //                 }
-  //               );
-  //             })
-  //             .catch((error) => {
-  //               toast.error(error?.error?.message);
-  //             }),
-  //           {
-  //             pending: "Step 1 of 2: Waiting for Allowance Tx. to Accept!",
-  //             error: "Something wrong with Borrow 😏💔",
-  //           }
-  //         );
-  //       } else {
-  //         borrowFromBTC();
-  //       }
-  //     })
-  //     .catch((err) => console.log(err));
-  // };
+
   // Borrow from BTC <<<_____________________________________________
   const handlePackagePopupButton = () => {
     // Borrow From BTC
@@ -225,12 +153,7 @@ export default function Home() {
     getInterestRates();
   };
 
-  // React.useEffect(() => {
-  //   if (ExchangeContract) getInterestRates();
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, []);
-
-  console.log("Collateral:", collateral);
+  // console.log("Collateral:", collateral);
   return (
     <div className="">
       <Head>
@@ -238,7 +161,6 @@ export default function Home() {
         <meta name="description" content="Generated by create next app" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-
       <main>
         <ToastContainer />
         <BorrowTokenPopup
@@ -252,13 +174,6 @@ export default function Home() {
         />
         <Hero />
         <Packages handlePackagesButton={handlePackagesButton} />
-        {/* {TESTBTCContract ? (
-          <Packages handlePackagesButton={handlePackagesButton} />
-        ) : (
-          <div className="flex justify-center">
-            <ScaleLoader size={20} />
-          </div>
-        )} */}
         <FAQ />
       </main>
 

@@ -13,8 +13,7 @@ export default function BorrowTokenPopup({
   collateral,
   setCollateral,
 }) {
-  // console.log("Interest Rate:", parseInt(interestRates[0]?._hex, 16));
-  console.log("colletral rate:", collateral);
+  // console.log("colletral rate:", collateral);
   return (
     <>
       <Transition appear show={borrowInfo?.openStatus} as={Fragment}>
@@ -91,22 +90,6 @@ export default function BorrowTokenPopup({
                       <span>
                         Paying Amount <span className="text-red-500">*</span>
                       </span>
-                      {/* <span className="text-xs">
-                        Account Interest:{" "}
-                        {collateral >= 200 && collateral <= 500
-                          ? parseInt(interestRates[0]?._hex, 16) / 100 + "%"
-                          : collateral >= 190 && collateral < 200
-                          ? parseInt(interestRates[1]?._hex, 16) / 100 + "%"
-                          : collateral >= 170 && collateral < 190
-                          ? parseInt(interestRates[2]?._hex, 16) / 100 + "%"
-                          : collateral >= 150 && collateral < 170
-                          ? parseInt(interestRates[3]?._hex, 16) / 100 + "%"
-                          : collateral >= 130 && collateral < 150
-                          ? parseInt(interestRates[4]?._hex, 16) / 100 + "%"
-                          : collateral >= 120 && collateral < 130
-                          ? parseInt(interestRates[5]?._hex, 16) / 100 + "%"
-                          : "Invalid"}
-                      </span> */}
                     </div>
 
                     <div className="flex justify-between items-center border border-gray-400 rounded-lg mt-1">
@@ -126,24 +109,6 @@ export default function BorrowTokenPopup({
                         {categoryInfo?.index === 0 ? "TESTETH" : "TESTBTC"}
                       </span>
                     </div>
-                    {/* <span className="text-right text-xs text-red-400 ml-1">
-                      {borrowInfo?.tokens > 0 || borrowInfo?.tokens === 0 ? (
-                        <span className="text-right text-xs text-gray-700">
-                          You Will Get Estimated{" "}
-                          {categoryInfo?.index === 0
-                            ? (borrowInfo?.tokens * categoryInfo?.ETHRate) /
-                              (collateral / 100)
-                            : categoryInfo?.index === 1
-                            ? (borrowInfo?.tokens * categoryInfo?.BTCRate) /
-                              (collateral / 100)
-                            : "Loading..."}
-                          GUSD
-                        </span>
-                      ) : (
-                        "Price must be greater then 1"
-                      )}
-                    </span> */}
-
                     <div className="flex justify-between items-center text-base pt-6 px-1">
                       <span className="font-semibbold text-sm text-gray-600">
                         Collateral
@@ -175,26 +140,6 @@ export default function BorrowTokenPopup({
                         />
                         <span className="mx-3">%</span>
                       </div>
-                      {/* <div className="flex items-center">
-                        <span className="flex justify-end ">
-                          <input
-                            type="number"
-                            value={collateral}
-                            onChange={(e) => setCollateral(e.target.value)}
-                            onBlur={(e) => {
-                              if (e.target.value < 120) setCollateral(120);
-                              else if (e.target.value > 500) setCollateral(500);
-                              else setCollateral(e.target.value);
-                            }}
-                            className={`w-7/12 text-sm outline-none rounded-full px-3 py-1 ${
-                              collateral >= 120 && collateral <= 500
-                                ? "border border-green-400"
-                                : "border border-red-400"
-                            }`}
-                          />
-                        </span>
-                        <span className="ml-2">%</span>
-                      </div> */}
                     </div>
                     <div className="flex justify-between items-center text-sm pt-2 pb-4 px-1">
                       <span className="font-semibbold text-gray-600">
@@ -202,17 +147,17 @@ export default function BorrowTokenPopup({
                       </span>
                       <div className="flex items-center">
                         {collateral >= 401 && collateral <= 500
-                          ? parseInt(interestRates[0]?._hex, 16) / 100 + "%"
+                          ? interestRates[0] + "%"
                           : collateral >= 301 && collateral < 401
-                          ? parseInt(interestRates[1]?._hex, 16) / 100 + "%"
+                          ? interestRates[1] + "%"
                           : collateral >= 251 && collateral < 301
-                          ? parseInt(interestRates[2]?._hex, 16) / 100 + "%"
+                          ? interestRates[2] + "%"
                           : collateral >= 201 && collateral < 251
-                          ? parseInt(interestRates[3]?._hex, 16) / 100 + "%"
+                          ? interestRates[3] + "%"
                           : collateral >= 171 && collateral < 201
-                          ? parseInt(interestRates[4]?._hex, 16) / 100 + "%"
+                          ? interestRates[4] + "%"
                           : collateral >= 120 && collateral < 171
-                          ? parseInt(interestRates[5]?._hex, 16) / 100 + "%"
+                          ? interestRates[5] + "%"
                           : "Invalid"}
                       </div>
                     </div>
