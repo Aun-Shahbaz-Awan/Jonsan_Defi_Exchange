@@ -1,5 +1,6 @@
 import React, { Fragment, useState } from "react";
 import { BsArrowRight } from "react-icons/bs";
+import { FaBtc } from "react-icons/fa";
 // Web 3
 import { ethers } from "ethers";
 import { useSigner, useAccount } from "wagmi";
@@ -364,23 +365,24 @@ function WBTCBoard() {
           <div className="bg-gradient-to-r from-[#FDD34D] via-[#FDD34D] to-[#FDD34D] rounded-xl p-7 shadow-xl">
             <div className="flex justify-between items-center mb-3">
               <h6 className="text-xl font-medium">Pay your WBTC Interest</h6>
-              <div className="w-24 ml-4">
+              <div className="ml-4 flex items-center">
                 {isLoaded ? (
-                  <Tab.Group>
-                    <Tab.List className="flex space-x-1 rounded-full p-1 bg-secondary-light">
-                      <Tab
-                        key="BTC"
-                        className="w-full rounded-full py-1 text-xs font-medium leading-5 text-primary bg-white shadow outline-none "
-                      >
-                        WBTC
-                      </Tab>
-                    </Tab.List>
-                  </Tab.Group>
+                  <></>
                 ) : (
-                  <div className="flex justify-center">
+                  <div className="flex justify-center mr-3">
                     <ScaleLoader size={20} />
                   </div>
                 )}
+                <Tab.Group>
+                  <Tab.List className="flex space-x-1 rounded-full p-1 bg-secondary-light">
+                    <Tab
+                      key="BTC"
+                      className="w-full rounded-full p-2 text-xs font-medium leading-5 text-primary bg-white shadow outline-none "
+                    >
+                      <FaBtc className="text-xl" />
+                    </Tab>
+                  </Tab.List>
+                </Tab.Group>
               </div>
             </div>
             <div className="flex justify-between items-center mb-3 w-full">
