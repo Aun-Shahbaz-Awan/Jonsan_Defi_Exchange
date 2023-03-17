@@ -1,4 +1,6 @@
-This is a [Next.js](https://nextjs.org/) App.
+This is a [Defi Decentralized Exchange](https://jonsan-exchange.netlify.app) DAPP.
+
+![](Jonsan_Exchange.png)
 
 ## Getting Started
 
